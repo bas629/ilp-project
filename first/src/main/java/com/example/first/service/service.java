@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
-public class StudentService {
+public class service {
 
     public final StudentRepo studentRepo;
     public final UserRepo userRepo;

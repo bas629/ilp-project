@@ -1,12 +1,8 @@
 package com.example.first.controller;
 
-import com.example.first.Dto.ExpanseDto;
-import com.example.first.Dto.UserDto;
 import com.example.first.Dto.createStudentDto;
 import com.example.first.Dto.studentDto;
-import com.example.first.entity.Expense;
-import com.example.first.service.StudentService;
-import lombok.Builder;
+import com.example.first.service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,24 +12,24 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class student {
-    private final StudentService studentService;
+    private final service service;
 
     @GetMapping("/student")
   public List<studentDto> getStudentData()
   {
-      return   studentService.getAllStudent();
+      return   service.getAllStudent();
 
   }
   @GetMapping("/student/{id}")
   public studentDto getStudentById(@PathVariable Long id)
   {
-      return studentService.findById(id);
+      return service.findById(id);
   }
 
   @PostMapping("/student")
    public  studentDto createStudent(@RequestBody createStudentDto addStudent )
   {
-    return studentService.createdNewStudent(addStudent);
+    return service.createdNewStudent(addStudent);
 
   }
 
@@ -41,7 +37,7 @@ public class student {
     @PatchMapping("/student/{id}")
     public studentDto upgradeStudent(@RequestBody Map<String, Object>  addStudent,@PathVariable Long id)
     {
-        return  studentService.updatedStudent(id , addStudent);
+        return  service.updatedStudent(id , addStudent);
 
     }
 
