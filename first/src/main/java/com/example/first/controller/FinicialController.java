@@ -27,22 +27,22 @@ public class FinicialController {
 
 
     @PostMapping("/Expanse")
-    public ExpanseDto createStudent(@RequestBody ExpanseDto ex) throws Exception {
-        return service.createExpanse(ex);
+    public ExpanseDto createStudent(@RequestBody ExpanseDto dto) throws Exception {
+        return service.createExpanse(dto);
 
 
     }
 
     @PostMapping("/investment")
-    public InvestmentDto investment (@RequestBody InvestmentDto ex) throws Exception {
-        return service.Inverstment(ex);
+    public InvestmentDto investment (@RequestBody InvestmentDto dto) throws Exception {
+        return service.Investment(dto);
 
 
     }
 
     @PostMapping("/Stock")
-    public void Stock (@RequestBody ExpanseDto ex) throws Exception {
-        service.StockAdd(ex);
+    public void Stock (@RequestBody ExpanseDto dto) throws Exception {
+        service.StockAdd(dto);
 
 
     } 

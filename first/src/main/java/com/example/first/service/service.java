@@ -136,7 +136,7 @@ public class service {
 
 
 
-public InvestmentDto Inverstment(InvestmentDto ex) throws Exception {
+public InvestmentDto Investment(InvestmentDto ex) throws Exception {
     User us = userRepo.findById(ex.getUserId())
             .orElseThrow(() -> new Exception("User not found"));
     Investment inv = new Investment();
@@ -152,7 +152,7 @@ public InvestmentDto Inverstment(InvestmentDto ex) throws Exception {
     ExpanseDto expanseDto =new ExpanseDto();
     expanseDto.setTitle("Buy Stock " + ex.getStockName());
     expanseDto.setAmount(ex.getInvestedAmount());
-    expanseDto.setCategory("Stock_Credited");
+    expanseDto.setCategory("Stock_Debited");
     expanseDto.setUserId(ex.getUserId());
     expanseDto.setExpenseDate(ex.getInvestmentDate());
 
