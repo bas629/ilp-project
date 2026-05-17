@@ -2,15 +2,19 @@ package com.example.first.controller;
 
 
 import com.example.first.Dto.*;
+import com.example.first.repo.ExpenseRepo;
 import com.example.first.service.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 public class FinicialController {
 
     private final service service;
+    private  final  ExpenseRepo expenseRepo;
 
     @PostMapping("/user")
     public UserDto createStudent(@RequestBody UserDto addStudent )
@@ -26,7 +30,7 @@ public class FinicialController {
     }
 
 
-    @PostMapping("/Expanse")
+    @PostMapping("/AddExpanse")
     public ExpanseDto createStudent(@RequestBody ExpanseDto dto) throws Exception {
         return service.createExpanse(dto);
 
@@ -45,7 +49,15 @@ public class FinicialController {
         service.StockAdd(dto);
 
 
-    } 
+    }
+    @GetMapping("/total")
+    public Optional<Double> getTotalByCategory(@RequestParam Long id,
+                                               @RequestParam String category)
+    {
+        return expenseRepo.getTotalByCategory(id,category);
+    }
+
+
     
     @PostMapping("/buyStock")
     public void BuyStock (@RequestBody ExpanseDto ex) throws Exception {

@@ -135,41 +135,63 @@ public class service {
 
 
 
+    public InvestmentDto Investment(InvestmentDto ex) throws Exception {
 
-public InvestmentDto Investment(InvestmentDto ex) throws Exception {
-    User us = userRepo.findById(ex.getUserId())
-            .orElseThrow(() -> new Exception("User not found"));
-    Investment inv = new Investment();
-    inv.setStockName(ex.getStockName());
-    inv.setInvestedAmount(ex.getInvestedAmount());
-    inv.setQuantity(ex.getQuantity());
-    inv.setRiskPercent(ex.getRiskPercent());
-    inv.setInvestmentDate(ex.getInvestmentDate());
+        User us = userRepo.findById(ex.getUserId())
+                .orElseThrow(() -> new Exception("User not found"));
 
-    inv.setUsertemp(us);
+        // Total credited money
+        Double totalCredit = expanseRepo
+                .getTotalByCategory(ex.getUserId(), "credited")
+                .orElse(0.0);
 
-    Investment savedInvestment = investmentRepo.save(inv);
-    ExpanseDto expanseDto =new ExpanseDto();
-    expanseDto.setTitle("Buy Stock " + ex.getStockName());
-    expanseDto.setAmount(ex.getInvestedAmount());
-    expanseDto.setCategory("Stock_Debited");
-    expanseDto.setUserId(ex.getUserId());
-    expanseDto.setExpenseDate(ex.getInvestmentDate());
+        // Total debited money
+        Double totalDebit = expanseRepo
+                .getTotalByCategory(ex.getUserId(), "debited")
+                .orElse(0.0);
 
-    createExpanse(expanseDto);
+        // Available balance
+        double balance = totalCredit - totalDebit;
 
-    return new InvestmentDto(
-            savedInvestment.getStockName(),
-            savedInvestment.getInvestedAmount(),
-            savedInvestment.getQuantity(),
-            savedInvestment.getRiskPercent(),
-            savedInvestment.getInvestmentDate(),
-            savedInvestment.getUsertemp().getUserId()
-    );
+        // Check balance
+        if(balance < ex.getInvestedAmount())
+        {
+            throw new Exception("Insufficient Balance");
+        }
 
+        // Save Investment
+        Investment inv = new Investment();
 
+        inv.setStockName(ex.getStockName());
+        inv.setInvestedAmount(ex.getInvestedAmount());
+        inv.setQuantity(ex.getQuantity());
+        inv.setRiskPercent(ex.getRiskPercent());
+        inv.setInvestmentDate(ex.getInvestmentDate());
 
-}
+        inv.setUsertemp(us);
+
+        Investment savedInvestment = investmentRepo.save(inv);
+
+        // Create Expense
+        ExpanseDto expanseDto = new ExpanseDto();
+
+        expanseDto.setTitle("Buy Stock " + ex.getStockName());
+        expanseDto.setAmount(ex.getInvestedAmount());
+        expanseDto.setCategory("Stock_Debited");
+        expanseDto.setUserId(ex.getUserId());
+        expanseDto.setExpenseDate(ex.getInvestmentDate());
+
+        createExpanse(expanseDto);
+
+        return new InvestmentDto(
+                savedInvestment.getStockName(),
+                savedInvestment.getInvestedAmount(),
+                savedInvestment.getQuantity(),
+                savedInvestment.getRiskPercent(),
+                savedInvestment.getInvestmentDate(),
+                savedInvestment.getUsertemp().getUserId()
+        );
+    }
     public void StockAdd( ExpanseDto ex) throws Exception {
 
 
