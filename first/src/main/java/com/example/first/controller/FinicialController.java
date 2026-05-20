@@ -2,11 +2,15 @@ package com.example.first.controller;
 
 
 import com.example.first.Dto.*;
+import com.example.first.entity.GoalTacker;
+import com.example.first.entity.Stock;
 import com.example.first.repo.ExpenseRepo;
 import com.example.first.service.service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -73,7 +77,27 @@ public class FinicialController {
     }
 
 
+    @PostMapping("/addGoal")
+    public GoalTacker addGoal(@RequestBody GoalTrackerDto ex)  throws Exception
+    {
+        return  service.addGoal(ex);
 
+
+    }
+
+    @GetMapping("/getGoal")
+    public  GetGoalTackerDto getGoal(@RequestParam Long id ) throws Exception
+    {
+        return service.getGoalTracker(id);
+
+    }
+
+    @GetMapping("/StockRisk")
+    public List<Stock> getStockByRisk(@RequestParam int risk)
+            throws Exception {
+
+        return service.getStockByRisk(risk);
+    }
 
 
 

@@ -21,6 +21,8 @@ public class service {
     public final ExpenseRepo expanseRepo;
     public  final InvestmentRepo investmentRepo;
     public final StockRepo stockRepo;
+    public  final  GoalTackerRepo goalTackerRepo;
+
 
     public List<studentDto> getAllStudent() {
         List<studentEntity> list = studentRepo.findAll();
@@ -207,6 +209,73 @@ public class service {
 
 
     }
+
+
+    public GoalTacker addGoal(GoalTrackerDto dto) throws Exception {
+
+        User user = userRepo.findById(dto.getUserId())
+                .orElseThrow(() -> new Exception("User not found"));
+
+       GoalTacker goal = new GoalTacker();
+
+        goal.setTargetAmount(dto.getTargetAmount());
+        goal.setUsertemp(user);
+
+        return goalTackerRepo.save(goal);
+    }
+
+    public GetGoalTackerDto getGoalTracker(Long userId) throws Exception {
+
+        Double totalCredit = expanseRepo
+                .getTotalByCategory(userId, "credited")
+                .orElse(0.0);
+
+        // Total debited money
+        Double totalDebit = expanseRepo
+                .getTotalByCategory(userId, "debited")
+                .orElse(0.0);
+
+        // Available balance
+        Double totalStockDebit = expanseRepo
+                .getTotalByCategory(userId, "Stock_debited")
+                .orElse(0.0);
+        double balance = totalCredit - totalDebit + totalStockDebit;
+
+        // Get Goal
+        GoalTacker goal = goalTackerRepo
+                .findByUsertemp_Id(userId)
+                .orElseThrow(() -> new Exception("Goal not found"));
+
+        int targetAmount = goal.getTargetAmount();
+
+        // Calculate Progress %
+        Double progress = (balance / targetAmount) * 100;
+
+        // DTO
+        GetGoalTackerDto dto = new GetGoalTackerDto();
+        dto.setTotalAmount(balance);
+        dto.setTargetAmount(targetAmount);
+        dto.setProgressPercentage(progress);
+
+        return dto;
+
+
+    }
+
+
+    public List<Stock> getStockByRisk(int risk) throws Exception {
+
+        List<Stock> stocks = stockRepo.findStockByRisk(risk);
+
+        if (stocks.isEmpty()) {
+            throw new Exception("No stock found for this risk%");
+        }
+
+        return stocks;
+    }
+
+
+
 
 
 

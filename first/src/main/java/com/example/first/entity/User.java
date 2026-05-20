@@ -41,8 +41,8 @@ public class User {
     @OneToMany(mappedBy = "usertemp", cascade = CascadeType.ALL)
     private List<Investment> investments;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    private List<Goal> goals;
+    @OneToOne(mappedBy = "usertemp", cascade = CascadeType.ALL)
+    private GoalTacker goals;
 //
 //    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
 //    private FinancialProfile financialProfile;
