@@ -1,0 +1,62 @@
+<div class="auth-container">
+  <div class="glass-panel auth-card">
+    <div class="auth-header">
+      <div class="logo-icon">
+        <span class="material-icons">query_stats</span>
+      </div>
+      <h1 class="logo-text">FINWELL</h1>
+      <p class="auth-subtitle">Financial Wellness & Smart Tracker</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="auth-form">
+      <div *ngIf="errorMessage" class="error-alert">
+        <span class="material-icons-outlined">error_outline</span>
+        <span class="error-text">{{ errorMessage }}</span>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="email">Email Address</label>
+        <div class="input-with-icon">
+          <span class="material-icons-outlined input-icon">email</span>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-control"
+            [(ngModel)]="credentials.email"
+            placeholder="name@example.com"
+            required
+            email
+            #emailInput="ngModel"
+          />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label class="input-label" for="password">Password</label>
+        <div class="input-with-icon">
+          <span class="material-icons-outlined input-icon">lock</span>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-control"
+            [(ngModel)]="credentials.password"
+            placeholder="••••••••"
+            required
+            #passwordInput="ngModel"
+          />
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="!isLoading">Access Account</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+
+      <div class="auth-footer">
+        <p>New to FinWell? <a routerLink="/register">Create an account</a></p>
+      </div>
+    </form>
+  </div>
+</div>

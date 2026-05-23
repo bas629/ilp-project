@@ -1,0 +1,383 @@
+.goals-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- HEADER SECTION --- */
+.goals-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.page-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.balance-display-card {
+  padding: 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  min-width: 250px;
+}
+
+.bal-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.bal-val {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: monospace;
+}
+
+/* --- LAYOUT GRID --- */
+.goals-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 24px;
+}
+
+.left-section, .right-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 16px;
+}
+
+/* --- CREATE FORM --- */
+.goal-creation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-row {
+  display: flex;
+  gap: 16px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.create-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 0.925rem;
+}
+
+/* --- GOALS LIST GRID --- */
+.goals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.goal-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: var(--transition-smooth);
+}
+
+.goal-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.04);
+}
+
+.goal-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goal-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.goal-progress-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.progress-ratio {
+  color: var(--text-secondary);
+}
+
+.progress-ratio strong {
+  color: #fff;
+  font-family: monospace;
+}
+
+.progress-percentage {
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+/* Progress bar inside card */
+.progress-track {
+  height: 10px;
+  background: #0f172a;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  background-color: var(--accent-cyan);
+  transition: width 0.5s ease-out;
+}
+
+.bg-gold-glow {
+  background-color: var(--accent-emerald) !important;
+  box-shadow: none !important;
+}
+
+.goal-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 14px;
+}
+
+.deadline-days {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.clock-icon {
+  font-size: 16px;
+  color: var(--text-muted);
+}
+
+.goal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-fund {
+  padding: 6px 14px;
+  font-size: 0.775rem;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-delete:hover {
+  background: rgba(244, 63, 94, 0.15);
+  color: var(--accent-rose);
+}
+
+/* --- DEPOSIT MODAL DIALOG --- */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 440px;
+  border-radius: 8px;
+  padding: 32px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-details h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 6px 0 2px;
+}
+
+.modal-sector {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.deposit-info-block {
+  background: #0f172a;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+}
+
+.info-row span {
+  color: var(--text-secondary);
+}
+
+.info-row strong {
+  color: #fff;
+  font-family: monospace;
+}
+
+.qty-input {
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.25rem;
+  padding: 12px;
+}
+
+.error-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-rose);
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 80px 40px;
+  color: var(--text-muted);
+}
+
+.empty-icon {
+  font-size: 48px;
+}
+
+.empty-state h4 {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.empty-state p {
+  font-size: 0.825rem;
+  max-width: 320px;
+  line-height: 1.4;
+}
+
+.text-debit {
+  color: var(--accent-rose) !important;
+}
+
+/* Animations */
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .goals-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.goal-extra-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  background-color: #0f172a;
+  border: 1px solid var(--glass-border);
+  padding: 8px 12px;
+  border-radius: 6px;
+}

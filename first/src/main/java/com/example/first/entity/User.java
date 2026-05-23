@@ -1,23 +1,21 @@
 package com.example.first.entity;
-// ==========================
-// USER ENTITY
-// ==========================
-
-
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "users")
-public class User {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,30 +23,42 @@ public class User {
 
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
     private String mobileNo;
 
     private String password;
 
-    // ================= RELATION =================
+    private String role; // e.g., ROLE_USER
 
-    @OneToMany(mappedBy = "usertemp", cascade = CascadeType.ALL)
-    private List<Expense> expenses = new ArrayList<>();
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(role != null ? role : "ROLE_USER"));
+    }
 
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
-    @OneToMany(mappedBy = "usertemp", cascade = CascadeType.ALL)
-    private List<Investment> investments;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-    @OneToOne(mappedBy = "usertemp", cascade = CascadeType.ALL)
-    private GoalTacker goals;
-//
-//    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-//    private FinancialProfile financialProfile;
-//
-//    @OneToMany(mappedBy = "usertemp", cascade = CascadeType.ALL)
-//    private List<Stock> Stocks;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
-    // Getter Setter
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

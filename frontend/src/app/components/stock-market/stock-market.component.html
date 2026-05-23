@@ -1,0 +1,227 @@
+<div class="stocks-wrapper animate-fade-in">
+  <!-- HEADER PANEL -->
+  <header class="stocks-header">
+    <div>
+      <h1 class="page-title">Mock Stock Exchange</h1>
+      <p class="page-subtitle">Trade simulated stock assets in real-time. Prices tick dynamically.</p>
+    </div>
+    
+    <div class="glass-panel balance-display-card">
+      <span class="bal-label">AVAILABLE CASH WALLET</span>
+      <h2 class="bal-val">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</h2>
+    </div>
+  </header>
+
+  <!-- FILTERS BAR -->
+  <div class="market-controls-row">
+    <div class="filters-group">
+      <!-- Search input -->
+      <div class="search-input-wrapper">
+        <span class="material-icons-outlined search-icon">search</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (ngModelChange)="applyFilters()" 
+          placeholder="Search companies..." 
+          class="form-control filter-control"
+        />
+      </div>
+
+      <!-- Sector select -->
+      <select 
+        [(ngModel)]="selectedSector" 
+        (change)="applyFilters()" 
+        class="form-control filter-control"
+      >
+        <option *ngFor="let sec of sectors" [value]="sec">{{ sec }}</option>
+      </select>
+
+      <!-- Volatility select -->
+      <select 
+        [(ngModel)]="selectedVolatility" 
+        (change)="applyFilters()" 
+        class="form-control filter-control"
+      >
+        <option *ngFor="let vol of volatilities" [value]="vol">{{ vol }}</option>
+      </select>
+    </div>
+
+    <button class="btn btn-secondary" (click)="fetchInitialData()" title="Reload Market Prices">
+      <span class="material-icons-outlined">refresh</span>
+      <span>Sync Market</span>
+    </button>
+  </div>
+
+  <!-- STOCKS CARDS GRID -->
+  <div *ngIf="isLoading && stocks.length === 0" class="loader-container">
+    <div class="spinner"></div>
+    <p>Opening live market board feeds...</p>
+  </div>
+
+  <div 
+    class="stocks-grid" 
+    *ngIf="!isLoading && filteredStocks.length > 0"
+  >
+    <div 
+      class="glass-panel stock-card" 
+      *ngFor="let stock of filteredStocks"
+      [ngClass]="stock.changeClass"
+    >
+      <!-- Top Badges -->
+      <div class="card-badges">
+        <span class="badge badge-sector">{{ stock.sector }}</span>
+        <!-- Risk category range badge with tooltip -->
+        <span 
+          class="badge" 
+          [ngClass]="getRiskBadgeClass(stock.riskPercent)"
+          [title]="getRiskTooltip(stock.riskPercent)"
+        >
+          {{ getRiskLabel(stock.riskPercent) }} ({{ stock.riskPercent }}%)
+        </span>
+      </div>
+
+      <!-- Company Name & Stats -->
+      <div class="card-main">
+        <h3 class="company-name">{{ stock.companyName }}</h3>
+        <p class="market-cap">Cap: {{ stock.marketCap | currency:'INR':'symbol':'1.0-0' }}M</p>
+      </div>
+
+      <!-- Live Price Details -->
+      <div class="card-price-section">
+        <span class="price-val">{{ stock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+        
+        <span 
+          class="price-pct-change" 
+          [ngClass]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'text-up' : 'text-down'"
+        >
+          <span class="material-icons-outlined arrow-icon">
+            {{ (stock.currentPrice - stock.previousPrice) >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+          </span>
+          {{ (((stock.currentPrice - stock.previousPrice) / stock.previousPrice) * 100) | number:'1.2-2' }}%
+        </span>
+      </div>
+
+      <!-- SVG Sparkline -->
+      <div class="sparkline-container" title="15-tick price trend">
+        <svg class="sparkline-svg">
+          <path 
+            [attr.d]="getSparklinePath(stock.priceHistory)" 
+            fill="none" 
+            [attr.stroke]="getSparklineColor(stock.priceHistory)" 
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+
+      <!-- Action Trades -->
+      <div class="card-actions">
+        <button class="btn btn-success flex-1" (click)="openTradeModal(stock, 'BUY')">
+          <span>BUY</span>
+        </button>
+        <button class="btn btn-danger flex-1" (click)="openTradeModal(stock, 'SELL')">
+          <span>SELL</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state fallback -->
+  <div 
+    class="glass-panel empty-board-panel" 
+    *ngIf="!isLoading && filteredStocks.length === 0"
+  >
+    <span class="material-icons-outlined empty-icon">analytics</span>
+    <h3>No Stocks Match Filters</h3>
+    <p>Try resetting the sector dropdown search filters to view active stock listings.</p>
+  </div>
+
+  <!-- BUY/SELL STOCKS DIALOG OVERLAY CONFIRMATION MODAL -->
+  <div class="modal-backdrop" *ngIf="showTradeModal">
+    <div class="glass-panel modal-card animate-scale-in">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="header-details">
+          <span class="badge" [ngClass]="tradeAction === 'BUY' ? 'badge-low' : 'badge-high'">
+            {{ tradeAction }} ORDER
+          </span>
+          <h2>Confirm Transaction</h2>
+          <span class="modal-sector">Company: {{ selectedStock?.companyName }}</span>
+        </div>
+        <button class="btn-close" (click)="closeTradeModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body" *ngIf="selectedStock">
+        <div class="deposit-info-block">
+          <div class="info-row">
+            <span>Cash Wallet Available:</span>
+            <strong>{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="info-row" *ngIf="tradeAction === 'SELL'">
+            <span>Your Owned Shares:</span>
+            <strong>{{ getCurrentHoldingsQty() }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Market Price:</span>
+            <strong>{{ selectedStock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="info-row border-top">
+            <span>Total Value:</span>
+            <strong class="total-val">{{ calculateTotalCost() | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+
+        <form (ngSubmit)="executeTrade()" class="deposit-form">
+          <div class="input-group">
+            <label class="input-label" for="qty">Quantity of Shares</label>
+            <input 
+              type="number" 
+              id="qty" 
+              name="qty" 
+              [(ngModel)]="tradeQuantity" 
+              class="form-control qty-input" 
+              required 
+              min="1"
+              step="1"
+            />
+          </div>
+
+          <!-- Warnings -->
+          <div *ngIf="tradeAction === 'BUY' && calculateTotalCost() > cashBalance" class="error-msg">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>Transaction exceeds your cash wallet funds.</span>
+          </div>
+
+          <div *ngIf="tradeAction === 'SELL' && tradeQuantity > getCurrentHoldingsQty()" class="error-msg">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>You cannot sell more shares than you hold.</span>
+          </div>
+
+          <div class="modal-buttons">
+            <button 
+              type="button" 
+              class="btn btn-secondary flex-1" 
+              (click)="closeTradeModal()"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="btn flex-2" 
+              [ngClass]="tradeAction === 'BUY' ? 'btn-success' : 'btn-danger'"
+              [disabled]="!isValidTrade() || isTrading"
+            >
+              <span *ngIf="!isTrading">Confirm {{ tradeAction }}</span>
+              <span *ngIf="isTrading" class="spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

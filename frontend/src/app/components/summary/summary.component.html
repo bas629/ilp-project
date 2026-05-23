@@ -1,0 +1,187 @@
+<div class="dashboard-wrapper">
+  <!-- LOADING & ERROR STATES -->
+  <div *ngIf="isLoading" class="loader-container">
+    <div class="spinner"></div>
+    <p>Assembling your financial intelligence dashboard...</p>
+  </div>
+
+  <div *ngIf="!isLoading && errorMessage" class="error-panel glass-panel">
+    <span class="material-icons-outlined error-icon">error_outline</span>
+    <h3>Connection Error</h3>
+    <p>{{ errorMessage }}</p>
+    <button class="btn btn-primary" (click)="fetchDashboardData()">Retry Connection</button>
+  </div>
+
+  <!-- DASHBOARD BODY -->
+  <div *ngIf="!isLoading && !errorMessage" class="dashboard-content animate-fade-in">
+    
+    <!-- Top Welcome Banner -->
+    <header class="dashboard-header-block">
+      <div>
+        <h1 class="welcome-title">Financial Intelligence Hub</h1>
+        <p class="welcome-subtitle">Here is your live wealth breakdown and risk diagnostics.</p>
+      </div>
+      <button class="btn btn-secondary refresh-btn" (click)="fetchDashboardData()" title="Reload Stats">
+        <span class="material-icons-outlined">sync</span>
+        <span>Refresh</span>
+      </button>
+    </header>
+
+    <!-- CORE KPI METRICS GRID -->
+    <div class="kpi-grid">
+      <!-- Net Worth Card -->
+      <div class="glass-panel kpi-card networth-card">
+        <div class="kpi-icon-wrapper cyan-glow">
+          <span class="material-icons-outlined">account_balance</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label">TOTAL NET WORTH</span>
+          <h2 class="kpi-value">{{ portfolio?.netWorth | currency:'INR':'symbol':'1.2-2' }}</h2>
+          <div class="sub-balances">
+            <div class="sub-bal-row">
+              <span>Cash Wallet:</span>
+              <strong>{{ portfolio?.cashBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="sub-bal-row">
+              <span>Stocks Assets:</span>
+              <strong>{{ portfolio?.stockHoldingsValue | currency:'INR':'symbol':'1.2-2' }}</strong>
+            </div>
+            <div class="sub-bal-row">
+              <span>Digital Gold:</span>
+              <strong>{{ portfolio?.goldHoldingsValue | currency:'INR':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wellness Dial Card -->
+      <div class="glass-panel kpi-card wellness-card">
+        <div class="dial-container">
+          <svg viewBox="0 0 100 100" class="svg-dial">
+            <circle class="dial-track" cx="50" cy="50" r="40" />
+            <circle 
+              class="dial-fill" 
+              cx="50" 
+              cy="50" 
+              r="40" 
+              [attr.stroke-dasharray]="251.2"
+              [attr.stroke-dashoffset]="251.2 - (251.2 * (wellness?.financialScore || 0)) / 100"
+              [style.stroke]="getWellnessScoreColor(wellness?.financialScore || 0)"
+            />
+          </svg>
+          <div class="dial-overlay">
+            <span class="dial-score-num">{{ wellness?.financialScore }}</span>
+            <span class="dial-score-max">/ 100</span>
+          </div>
+        </div>
+        <div class="kpi-info text-center">
+          <span class="kpi-label">WELLNESS SCORE</span>
+          <h3 class="wellness-status-text" [style.color]="getWellnessScoreColor(wellness?.financialScore || 0)">
+            {{ wellness?.currentStatus }}
+          </h3>
+          <p class="score-desc">Based on savings habits, risk profiles, and goal milestones.</p>
+        </div>
+      </div>
+
+      <!-- Risk Profile Card -->
+      <div class="glass-panel kpi-card risk-card">
+        <div class="dial-container">
+          <svg viewBox="0 0 100 100" class="svg-dial">
+            <circle class="dial-track" cx="50" cy="50" r="40" />
+            <circle 
+              class="dial-fill-risk" 
+              cx="50" 
+              cy="50" 
+              r="40" 
+              [attr.stroke-dasharray]="251.2"
+              [attr.stroke-dashoffset]="251.2 - (251.2 * (portfolio?.portfolioRisk || 0)) / 100"
+            />
+          </svg>
+          <div class="dial-overlay">
+            <span class="dial-score-num">{{ portfolio?.portfolioRisk | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+        <div class="kpi-info text-center">
+          <span class="kpi-label">PORTFOLIO VOLATILITY / RISK</span>
+          <span class="badge risk-badge" [ngClass]="getRiskBadgeClass(portfolio?.portfolioRisk || 0)">
+            {{ getRiskLabel(portfolio?.portfolioRisk || 0) }}
+          </span>
+          <p class="score-desc">Weighted average risk of all stock holdings and gold assets.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOWER MODULES: ALLOCATION & AI TIPS -->
+    <div class="details-grid">
+      <!-- Allocation Panel -->
+      <div class="glass-panel details-panel allocation-panel">
+        <h3 class="panel-title">Asset Allocation</h3>
+        <p class="panel-subtitle">Current diversification profile of your investments.</p>
+        
+        <div class="allocation-bars" *ngIf="portfolio && portfolio.netWorth > 0">
+          <!-- Cash bar -->
+          <div class="alloc-bar-item">
+            <div class="alloc-labels">
+              <span>Cash Balance</span>
+              <strong>{{ (portfolio.cashBalance / portfolio.netWorth * 100) | number:'1.1-1' }}%</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-cash" [style.width.%]="(portfolio.cashBalance / portfolio.netWorth * 100)"></div>
+            </div>
+          </div>
+
+          <!-- Stocks bar -->
+          <div class="alloc-bar-item">
+            <div class="alloc-labels">
+              <span>Stock Exchange Holdings</span>
+              <strong>{{ (portfolio.stockHoldingsValue / portfolio.netWorth * 100) | number:'1.1-1' }}%</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-stocks" [style.width.%]="(portfolio.stockHoldingsValue / portfolio.netWorth * 100)"></div>
+            </div>
+          </div>
+
+          <!-- Gold bar -->
+          <div class="alloc-bar-item">
+            <div class="alloc-labels">
+              <span>Digital Gold Holdings</span>
+              <strong>{{ (portfolio.goldHoldingsValue / portfolio.netWorth * 100) | number:'1.1-1' }}%</strong>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill fill-gold" [style.width.%]="(portfolio.goldHoldingsValue / portfolio.netWorth * 100)"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="allocation-footer">
+          <div class="diversification-score-card">
+            <span>DIVERSIFICATION FACTOR:</span>
+            <strong class="factor-val">{{ portfolio?.diversificationScore }} / 100</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Recommendations Panel -->
+      <div class="glass-panel details-panel advice-panel">
+        <h3 class="panel-title">Smart Financial Guidance</h3>
+        <p class="panel-subtitle">Rule-based recommendations based on your current stats.</p>
+
+        <div class="advice-list">
+          <div 
+            class="advice-card" 
+            *ngFor="let advice of wellness?.recommendations"
+          >
+            <span class="material-icons-outlined advice-bullet">emoji_objects</span>
+            <p class="advice-text">{{ advice }}</p>
+          </div>
+
+          <div class="advice-card" *ngIf="!wellness?.recommendations || wellness?.recommendations?.length === 0">
+            <span class="material-icons-outlined advice-bullet text-success">check_circle</span>
+            <p class="advice-text">Your financial health is outstanding! Keep following your current savings plan and investment mix.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

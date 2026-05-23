@@ -1,0 +1,279 @@
+@import '@fontsource/plus-jakarta-sans/300.css';
+@import '@fontsource/plus-jakarta-sans/400.css';
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/plus-jakarta-sans/800.css';
+
+:root {
+  --bg-primary: #0f172a;        /* Solid Dark Slate background */
+  --bg-secondary: #1e293b;      /* Solid Dark Slate panel background */
+  --glass-bg: #1e293b;          /* Solid Slate panel */
+  --glass-border: #334155;      /* Slate border */
+  --glass-glow: transparent;
+  
+  --accent-cyan: #2563eb;       /* Standard blue for primary actions */
+  --accent-violet: #4f46e5;     /* Standard indigo for visual separation */
+  --accent-emerald: #16a34a;    /* Clean standard green */
+  --accent-rose: #dc2626;       /* Clean standard red */
+  --accent-amber: #d97706;      /* Clean standard amber */
+
+  --text-primary: #ffffff;      /* Pure white for title/important texts */
+  --text-secondary: #cbd5e1;    /* Slate-200 for subtext and body */
+  --text-muted: #94a3b8;        /* Slate-400 for muted descriptions */
+  
+  --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --transition-smooth: all 0.2s ease-in-out;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.15) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(139, 92, 246, 0.1) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px; /* standard simple border-radius */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* simple card shadow */
+  padding: 24px;
+  transition: var(--transition-smooth);
+}
+
+.glass-panel:hover {
+  border-color: #475569; /* slate-600 */
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Animations */
+@keyframes flash-green {
+  0% { background-color: rgba(16, 185, 129, 0.2); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+  0% { background-color: rgba(244, 63, 94, 0.2); }
+  100% { background-color: transparent; }
+}
+
+.price-flash-up {
+  animation: flash-green 1.5s ease-out;
+}
+
+.price-flash-down {
+  animation: flash-red 1.5s ease-out;
+}
+
+/* Common utilities */
+.badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-low {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-med {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--accent-amber);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.badge-high {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.badge-speculative {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-violet);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Buttons */
+.btn {
+  font-family: var(--font-family);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  white-space: nowrap;          /* Prevent text wrapping */
+  min-width: max-content;       /* Ensure buttons are large enough for their text */
+}
+
+.btn-primary {
+  background-color: #2563eb;    /* Clean solid blue background */
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: #475569;    /* Clean solid slate gray */
+  color: #ffffff;
+  border: 1px solid #64748b;
+}
+
+.btn-secondary:hover {
+  background-color: #334155;
+}
+
+.btn-success {
+  background-color: #16a34a;    /* Solid emerald green */
+  color: #ffffff;
+  border: 1px solid #15803d;
+}
+
+.btn-success:hover {
+  background-color: #15803d;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background-color: #dc2626;    /* Solid red */
+  color: #ffffff;
+  border: 1px solid #b91c1c;
+}
+
+.btn-danger:hover {
+  background-color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Form controls */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.input-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+}
+
+.form-control {
+  background-color: #ffffff;    /* Solid white background for inputs and dropdowns */
+  border: 1px solid #94a3b8;    /* Visible border */
+  color: #0f172a;               /* Dark Slate text for 100% readability */
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #2563eb;        /* Solid blue focus border */
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+/* Explicit style for dropdown options so they are never white-on-white */
+.form-control option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+/* Custom Snackbars */
+.mat-mdc-snack-bar-container.notif-success .mdc-snackbar__surface {
+  background-color: #10b981 !important; /* Emerald */
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+.mat-mdc-snack-bar-container.notif-error .mdc-snackbar__surface {
+  background-color: #f43f5e !important; /* Rose */
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3) !important;
+}
+.mat-mdc-snack-bar-container.notif-warning .mdc-snackbar__surface {
+  background-color: #f59e0b !important; /* Amber */
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
+}
+.mat-mdc-snack-bar-container.notif-info .mdc-snackbar__surface {
+  background-color: #06b6d4 !important; /* Cyan */
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3) !important;
+}
+
+/* Ensure snackbar text matches design standards */
+.mdc-snackbar__label {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  color: #ffffff !important;
+}
+.mdc-snackbar__actions button {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}

@@ -1,0 +1,123 @@
+<div class="auth-container">
+  <div class="glass-panel auth-card">
+     <div class="auth-header">
+       <div class="logo-icon">
+         <span class="material-icons">query_stats</span>
+       </div>
+       <h1 class="logo-text">FINWELL</h1>
+       <p class="auth-subtitle">Create your financial intelligence account</p>
+     </div>
+
+     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form">
+       <div *ngIf="errorMessage" class="error-alert">
+         <span class="material-icons-outlined">error_outline</span>
+         <span class="error-text">{{ errorMessage }}</span>
+       </div>
+
+       <div class="input-group">
+         <label class="input-label" for="name">Full Name</label>
+         <div class="input-with-icon">
+           <span class="material-icons-outlined input-icon">person</span>
+           <input
+             type="text"
+             id="name"
+             formControlName="name"
+             class="form-control"
+             placeholder="John Doe"
+           />
+         </div>
+         <div *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="validation-error">
+           Name is required
+         </div>
+       </div>
+
+       <div class="input-group">
+         <label class="input-label" for="email">Email Address</label>
+         <div class="input-with-icon">
+           <span class="material-icons-outlined input-icon">email</span>
+           <input
+             type="email"
+             id="email"
+             formControlName="email"
+             class="form-control"
+             placeholder="name@example.com"
+           />
+         </div>
+         <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="validation-error">
+           <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+           <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email address</span>
+         </div>
+       </div>
+
+       <div class="input-group">
+         <label class="input-label" for="mobileNo">Mobile Number</label>
+         <div class="input-with-icon">
+           <span class="material-icons-outlined input-icon">phone</span>
+           <input
+             type="tel"
+             id="mobileNo"
+             formControlName="mobileNo"
+             class="form-control"
+             placeholder="9876543210"
+           />
+         </div>
+         <div *ngIf="registerForm.get('mobileNo')?.touched && registerForm.get('mobileNo')?.invalid" class="validation-error">
+           <span *ngIf="registerForm.get('mobileNo')?.errors?.['required']">Mobile number is required</span>
+           <span *ngIf="registerForm.get('mobileNo')?.errors?.['pattern']">Please enter a valid 10-15 digit mobile number</span>
+         </div>
+       </div>
+
+       <div class="input-group">
+         <label class="input-label" for="password">Password</label>
+         <div class="input-with-icon">
+           <span class="material-icons-outlined input-icon">lock</span>
+           <input
+             type="password"
+             id="password"
+             formControlName="password"
+             class="form-control"
+             placeholder="••••••••"
+           />
+         </div>
+         <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="validation-error">
+           <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+           <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 8 characters long</span>
+           <span *ngIf="registerForm.get('password')?.errors?.['strongPassword'] && !registerForm.get('password')?.errors?.['minlength']">Password is too weak</span>
+         </div>
+
+         <!-- Real-time requirements checklist -->
+         <div class="password-requirements-container" *ngIf="registerForm.get('password')?.value">
+           <div class="requirement-item" [ngClass]="getPasswordRequirements().length ? 'met' : 'unmet'">
+             <span class="material-icons">{{ getPasswordRequirements().length ? 'check_circle' : 'cancel' }}</span>
+             <span>At least 8 characters</span>
+           </div>
+           <div class="requirement-item" [ngClass]="getPasswordRequirements().hasUpper ? 'met' : 'unmet'">
+             <span class="material-icons">{{ getPasswordRequirements().hasUpper ? 'check_circle' : 'cancel' }}</span>
+             <span>At least 1 uppercase letter</span>
+           </div>
+           <div class="requirement-item" [ngClass]="getPasswordRequirements().hasLower ? 'met' : 'unmet'">
+             <span class="material-icons">{{ getPasswordRequirements().hasLower ? 'check_circle' : 'cancel' }}</span>
+             <span>At least 1 lowercase letter</span>
+           </div>
+           <div class="requirement-item" [ngClass]="getPasswordRequirements().hasNumber ? 'met' : 'unmet'">
+             <span class="material-icons">{{ getPasswordRequirements().hasNumber ? 'check_circle' : 'cancel' }}</span>
+             <span>At least 1 number</span>
+           </div>
+           <div class="requirement-item" [ngClass]="getPasswordRequirements().hasSpecial ? 'met' : 'unmet'">
+             <span class="material-icons">{{ getPasswordRequirements().hasSpecial ? 'check_circle' : 'cancel' }}</span>
+             <span>At least 1 special character</span>
+           </div>
+         </div>
+       </div>
+
+       <button type="submit" class="btn btn-primary btn-block" [disabled]="registerForm.invalid || isLoading">
+         <span *ngIf="!isLoading">Register Account</span>
+         <span *ngIf="isLoading" class="spinner"></span>
+       </button>
+
+       <div class="auth-footer">
+         <p>Already have an account? <a routerLink="/login">Sign in</a></p>
+       </div>
+     </form>
+  </div>
+</div>

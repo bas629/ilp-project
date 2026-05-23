@@ -1,18 +1,16 @@
 package com.example.first.entity;
 
-
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
+@Table(name = "stocks")
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Stock {
 
     @Id
@@ -20,15 +18,16 @@ public class Stock {
     private Long stockId;
 
     private String companyName;
-
-    private Double stockPrice;
-
+    private Double currentPrice;
+    private Double previousPrice;
     private Double riskPercent;
+    private Double expectedReturn;
+    private Long marketCap;
+    private String sector;
+    private String volatility; // LOW, MEDIUM, HIGH
+    private String stockStatus; // UP, DOWN, STABLE
+    private LocalDateTime lastUpdated;
 
-    private String stockStatus;
-
-    // ================= RELATION =================
-
-
-    // Getter Setter
+    @Transient
+    private List<Double> priceHistory;
 }

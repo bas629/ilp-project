@@ -1,0 +1,181 @@
+<div class="gold-wrapper animate-fade-in">
+  <!-- HEADER PANEL -->
+  <header class="gold-header">
+    <div>
+      <h1 class="page-title">Digital Gold Assets</h1>
+      <p class="page-subtitle">Hedge your portfolio against stock volatility. Gold is backed by physical reserves.</p>
+    </div>
+    
+    <div class="glass-panel balance-display-card">
+      <span class="bal-label">AVAILABLE CASH WALLET</span>
+      <h2 class="bal-val">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</h2>
+    </div>
+  </header>
+
+  <!-- CONTENT GRID -->
+  <div class="gold-main-grid">
+    <!-- LEFT PANEL: PRICE DISPLAY & TRADE TICKET -->
+    <div class="left-section">
+      <!-- Live ticker card -->
+      <div class="glass-panel price-card" [ngClass]="priceChangeClass">
+        <div class="price-header">
+          <span class="badge gold-badge">
+            <span class="material-icons-outlined gold-icon">stars</span>
+            <span>DIGITAL GOLD (99.9% Purity)</span>
+          </span>
+          <span class="badge cycle-badge">
+            Cycle: {{ marketCycle }}
+          </span>
+        </div>
+
+        <div class="price-main-display">
+          <span class="price-amount">{{ goldPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+          <span class="price-unit">per gram</span>
+        </div>
+
+        <!-- Live Trend indicator details -->
+        <div class="live-trend-details" *ngIf="previousPrice && getChangePercent() !== 0">
+          <span class="trend-lbl">Price Volatility Trend:</span>
+          <span class="trend-indicator-val" [ngClass]="getChangePercent() >= 0 ? 'text-credit' : 'text-debit'">
+            <span class="material-icons trend-arrow">
+              {{ getChangePercent() >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+            <strong>{{ getChangePercent() >= 0 ? '+' : '' }}{{ getChangePercent() | number:'1.2-2' }}%</strong>
+          </span>
+          <span class="prev-price-lbl"> (Prev: {{ previousPrice | currency:'INR':'symbol':'1.2-2' }})</span>
+        </div>
+
+        <p class="tick-disclaimer">Price updates automatically every 10 seconds based on live market conditions.</p>
+      </div>
+
+      <!-- Trade widget card -->
+      <div class="glass-panel trade-ticket-card">
+        <h3 class="section-title">Trade Ticket</h3>
+        
+        <!-- Action Tabs -->
+        <div class="tab-header">
+          <button 
+            type="button" 
+            class="tab-btn" 
+            [ngClass]="{'tab-active-buy': tradeAction === 'BUY'}"
+            (click)="setTradeAction('BUY')"
+          >
+            Buy Gold
+          </button>
+          <button 
+            type="button" 
+            class="tab-btn" 
+            [ngClass]="{'tab-active-sell': tradeAction === 'SELL'}"
+            (click)="setTradeAction('SELL')"
+          >
+            Sell Gold
+          </button>
+        </div>
+
+        <form (ngSubmit)="executeGoldTrade()" class="trade-ticket-form">
+          <div class="input-group">
+            <label class="input-label" for="goldGrams">Amount in Grams</label>
+            <input 
+              type="number" 
+              id="goldGrams" 
+              name="goldGrams" 
+              [(ngModel)]="tradeAmount" 
+              class="form-control grams-input" 
+              required 
+              min="0.01" 
+              step="0.01"
+            />
+          </div>
+
+          <div class="order-preview-box">
+            <div class="preview-row">
+              <span>Subtotal:</span>
+              <span>{{ calculateTotalCost() | currency:'INR':'symbol':'1.2-2' }}</span>
+            </div>
+            <div class="preview-row">
+              <span>Transaction Fee:</span>
+              <span>{{ 0 | currency:'INR':'symbol':'1.2-2' }} (Zero Brokerage)</span>
+            </div>
+            <div class="preview-divider"></div>
+            <div class="preview-row total-row">
+              <span>Estimated {{ tradeAction === 'BUY' ? 'Debit' : 'Credit' }}:</span>
+              <strong>{{ calculateTotalCost() | currency:'INR':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <!-- Validations -->
+          <div *ngIf="tradeAction === 'BUY' && calculateTotalCost() > cashBalance" class="error-alert-box">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>Insufficient cash wallet balance.</span>
+          </div>
+
+          <div *ngIf="tradeAction === 'SELL' && tradeAmount > getGoldGramsOwned()" class="error-alert-box">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>Insufficient gold holdings. You hold {{ getGoldGramsOwned() | number:'1.2-3' }}g.</span>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-block" 
+            [ngClass]="tradeAction === 'BUY' ? 'btn-success' : 'btn-danger'"
+            [disabled]="!isValidTrade() || isTrading"
+          >
+            <span *ngIf="!isTrading">Execute {{ tradeAction }}</span>
+            <span *ngIf="isTrading" class="spinner"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: PORTFOLIO SUMMARY & HISTORICAL CHART -->
+    <div class="right-section">
+      <!-- Gold holdings info -->
+      <div class="glass-panel holdings-summary-card">
+        <h3 class="section-title">Your Gold Portfolio</h3>
+        
+        <div class="holdings-stats-grid">
+          <div class="hold-stat-box">
+            <span class="stat-lbl">Grams Owned</span>
+            <h4 class="stat-val">{{ getGoldGramsOwned() | number:'1.2-3' }} g</h4>
+          </div>
+
+          <div class="hold-stat-box">
+            <span class="stat-lbl">Avg Buy Price</span>
+            <h4 class="stat-val">{{ getGoldAverageBuyPrice() | currency:'INR':'symbol':'1.2-2' }}</h4>
+          </div>
+
+          <div class="hold-stat-box">
+            <span class="stat-lbl">Current Value</span>
+            <h4 class="stat-val">{{ getGoldHoldingsValue() | currency:'INR':'symbol':'1.2-2' }}</h4>
+          </div>
+
+          <div class="hold-stat-box">
+            <span class="stat-lbl">Net Profit / Loss</span>
+            <h4 
+              class="stat-val" 
+              [ngClass]="(portfolio?.goldProfitLoss || 0) >= 0 ? 'text-credit' : 'text-debit'"
+            >
+              {{ (portfolio?.goldProfitLoss || 0) >= 0 ? '+' : '' }}{{ portfolio?.goldProfitLoss | currency:'INR':'symbol':'1.2-2' }}
+            </h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Chart -->
+      <div class="glass-panel gold-chart-card">
+        <h3 class="section-title">Gold Spot Price Trend</h3>
+        <p class="section-subtitle">Real-time charts plotting spot value updates.</p>
+        
+        <div class="chart-content-box">
+          <canvas 
+            baseChart 
+            [data]="lineChartData" 
+            [options]="lineChartOptions" 
+            [type]="lineChartType"
+          ></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<div class="landing-container">
+  <!-- Nav Bar -->
+  <header class="navbar glass-panel">
+    <div class="logo">
+      <span class="material-icons logo-icon">query_stats</span>
+      <span class="logo-text">FINWELL</span>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/login" class="btn btn-secondary btn-sm">Log In</a>
+      <a routerLink="/register" class="btn btn-primary btn-sm">Get Started</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="badge badge-speculative mb-4">
+        <span class="material-icons-outlined">offline_bolt</span>
+        Smart Finance Simulator
+      </div>
+      <h1 class="hero-title">
+        Master Your Money <br/>
+        <span class="gradient-text">Without the Risk</span>
+      </h1>
+      <p class="hero-subtitle">
+        Track expenses, build savings goals, and trade in simulated stock and digital gold markets. Get real-time updates and an AI-driven financial wellness score.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/register" class="btn btn-primary btn-lg">
+          Start Free Simulation
+          <span class="material-icons">arrow_forward</span>
+        </a>
+        <a routerLink="/login" class="btn btn-secondary btn-lg">Access Account</a>
+      </div>
+    </div>
+
+    <!-- Hero Visual / Dashboard Preview -->
+    <div class="hero-visual">
+      <div class="mockup-card glass-panel">
+        <div class="mockup-header">
+          <div class="window-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <div class="mockup-title">FinWell Dashboard</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-widget-grid">
+            <div class="mockup-widget">
+              <span class="widget-label">Net Worth</span>
+              <span class="widget-value">₹54,230.15</span>
+              <span class="widget-trend positive">+8.46%</span>
+            </div>
+            <div class="mockup-widget">
+              <span class="widget-label">Wellness Score</span>
+              <span class="widget-value text-accent">88 / 100</span>
+              <span class="widget-trend">EXCELLENT</span>
+            </div>
+          </div>
+          <div class="mockup-chart-placeholder">
+            <div class="chart-bar" style="height: 40%"></div>
+            <div class="chart-bar" style="height: 60%"></div>
+            <div class="chart-bar" style="height: 45%"></div>
+            <div class="chart-bar" style="height: 80%"></div>
+            <div class="chart-bar" style="height: 95%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Grid -->
+  <section class="features-section">
+    <div class="section-header">
+      <h2 class="section-title">Everything You Need to Build Wealth</h2>
+      <p class="section-subtitle">Features crafted to give you ultimate control over your virtual portfolio and real habits.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card glass-panel" *ngFor="let feat of features">
+        <div class="feat-icon-wrapper">
+          <span class="material-icons feat-icon">{{ feat.icon }}</span>
+        </div>
+        <h3 class="feat-title">{{ feat.title }}</h3>
+        <p class="feat-desc">{{ feat.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Banner -->
+  <section class="stats-section glass-panel">
+    <div class="stat-item" *ngFor="let stat of stats">
+      <span class="stat-value gradient-text">{{ stat.value }}</span>
+      <span class="stat-label">{{ stat.label }}</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <p>&copy; 2026 FinWell Inc. Built with Angular & Spring Boot.</p>
+  </footer>
+</div>

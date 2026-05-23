@@ -1,0 +1,259 @@
+<div class="goals-wrapper animate-fade-in">
+  <!-- HEADER BLOCK -->
+  <header class="goals-header">
+    <div>
+      <h1 class="page-title">Savings Goals</h1>
+      <p class="page-subtitle">Set clear savings targets and fund them directly from your cash wallet.</p>
+    </div>
+    
+    <div class="glass-panel balance-display-card">
+      <span class="bal-label">AVAILABLE CASH WALLET</span>
+      <h2 class="bal-val">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</h2>
+    </div>
+  </header>
+
+  <!-- CONTENT LAYOUT -->
+  <div class="goals-main-grid">
+    <!-- LEFT SIDE: CREATE GOAL FORM -->
+    <div class="left-section">
+      <section class="glass-panel form-panel">
+        <h3 class="section-title">Create New Goal</h3>
+        <form (ngSubmit)="onSubmit()" #goalForm="ngForm" class="goal-creation-form">
+          <div class="input-group">
+            <label class="input-label" for="goalName">Goal Name / Objective</label>
+            <input 
+              type="text" 
+              id="goalName" 
+              name="goalName" 
+              [(ngModel)]="newGoal.goalName" 
+              class="form-control" 
+              placeholder="e.g. Emergency Fund, Tesla Model Y" 
+              required
+            />
+          </div>
+
+          <div class="input-row">
+            <div class="input-group flex-1">
+              <label class="input-label" for="target">Target Amount (₹)</label>
+              <input 
+                type="number" 
+                id="target" 
+                name="targetAmount" 
+                [(ngModel)]="newGoal.targetAmount" 
+                class="form-control" 
+                placeholder="1000.00" 
+                required 
+                min="1"
+              />
+            </div>
+
+            <div class="input-group flex-1">
+              <label class="input-label" for="deadline">Target Deadline</label>
+              <input 
+                type="date" 
+                id="deadline" 
+                name="deadline" 
+                [(ngModel)]="newGoal.deadline" 
+                class="form-control" 
+                required
+              />
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            class="btn btn-primary create-btn" 
+            [disabled]="goalForm.invalid || isSaving || newGoal.targetAmount <= 0"
+          >
+            <span class="material-icons-outlined">track_changes</span>
+            <span>Establish Goal</span>
+          </button>
+        </form>
+      </section>
+    </div>
+
+    <!-- RIGHT SIDE: GOALS CARD LIST -->
+    <div class="right-section">
+      <div *ngIf="isLoading && goals.length === 0" class="loader-container">
+        <div class="spinner"></div>
+        <p>Loading your financial targets...</p>
+      </div>
+
+      <div 
+        class="goals-grid" 
+        *ngIf="!isLoading && goals.length > 0"
+      >
+        <div 
+          class="glass-panel goal-card" 
+          *ngFor="let goal of goals"
+        >
+          <!-- Top Row -->
+          <div class="goal-card-header">
+            <h3 class="goal-title">{{ goal.goalName }}</h3>
+            
+            <span 
+              class="badge" 
+              [ngClass]="goal.status === 'ACHIEVED' ? 'badge-low' : 'badge-med'"
+            >
+              {{ goal.status }}
+            </span>
+          </div>
+
+          <!-- Progress numerical details -->
+          <div class="goal-progress-details">
+            <span class="progress-ratio">
+              <strong>{{ goal.currentAmount | currency:'INR':'symbol':'1.2-2' }}</strong> 
+              of {{ goal.targetAmount | currency:'INR':'symbol':'1.2-2' }}
+            </span>
+            <span class="progress-percentage">
+              {{ getProgressPercent(goal) | number:'1.0-0' }}%
+            </span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="progress-track">
+            <div 
+              class="progress-fill" 
+              [ngClass]="{'bg-gold-glow': goal.status === 'ACHIEVED'}"
+              [style.width.%]="getProgressPercent(goal)"
+            ></div>
+          </div>
+
+          <!-- Completion stats details -->
+          <div class="goal-extra-details" *ngIf="goal.status !== 'ACHIEVED'">
+            <span class="stat-lbl">Remaining Target:</span>
+            <strong class="text-debit font-mono">{{ (goal.targetAmount - (goal.currentAmount || 0)) | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+
+          <!-- Footer details and actions -->
+          <div class="goal-card-footer">
+            <span class="deadline-days">
+              <span class="material-icons-outlined clock-icon">schedule</span>
+              <span *ngIf="goal.status === 'ACHIEVED'">Target Achieved!</span>
+              <span *ngIf="goal.status !== 'ACHIEVED' && getDaysRemaining(goal.deadline) > 0">
+                {{ getDaysRemaining(goal.deadline) }} days left
+              </span>
+              <span *ngIf="goal.status !== 'ACHIEVED' && getDaysRemaining(goal.deadline) <= 0" class="text-debit">
+                Overdue
+              </span>
+            </span>
+
+            <div class="goal-actions">
+              <button 
+                class="btn btn-success btn-fund" 
+                *ngIf="goal.status !== 'ACHIEVED'"
+                (click)="openDepositModal(goal)"
+                [disabled]="cashBalance <= 0"
+              >
+                <span>Deposit</span>
+              </button>
+              
+              <button 
+                class="btn-delete" 
+                (click)="onDelete(goal.goalId)" 
+                title="Delete goal"
+              >
+                <span class="material-icons-outlined">delete_outline</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div 
+        *ngIf="!isLoading && goals.length === 0" 
+        class="glass-panel empty-state"
+      >
+        <span class="material-icons-outlined empty-icon">assignment_turned_in</span>
+        <h4>No Active Goals</h4>
+        <p>Define a financial objective on the left (e.g. down payments, travel funds) to monitor your savings milestones.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPOSIT TO GOAL MODAL DIALOG OVERLAY -->
+  <div class="modal-backdrop" *ngIf="showDepositModal">
+    <div class="glass-panel modal-card animate-scale-in">
+      
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="header-details">
+          <span class="badge badge-low">WALLET TRANSFER</span>
+          <h2>Deposit to Goal</h2>
+          <span class="modal-sector">Fund: {{ selectedGoal?.goalName }}</span>
+        </div>
+        <button class="btn-close" (click)="closeDepositModal()">
+          <span class="material-icons">close</span>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body" *ngIf="selectedGoal">
+        <div class="deposit-info-block">
+          <div class="info-row">
+            <span>Cash Wallet Available:</span>
+            <strong>{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Current Goal Balance:</span>
+            <strong>{{ selectedGoal.currentAmount | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Remaining Target:</span>
+            <strong>{{ (selectedGoal.targetAmount - (selectedGoal.currentAmount || 0)) | currency:'INR':'symbol':'1.2-2' }}</strong>
+          </div>
+        </div>
+
+        <form (ngSubmit)="executeDeposit()" class="deposit-form">
+          <div class="input-group">
+            <label class="input-label" for="amount">Deposit Amount (₹)</label>
+            <input 
+              type="number" 
+              id="amount" 
+              name="amount" 
+              [(ngModel)]="depositAmount" 
+              class="form-control qty-input" 
+              required 
+              min="0.01"
+              [max]="cashBalance"
+            />
+          </div>
+
+          <!-- Warnings -->
+          <div *ngIf="depositAmount > cashBalance" class="error-msg">
+            <span class="material-icons-outlined">error_outline</span>
+            <span>Deposit exceeds your cash wallet funds.</span>
+          </div>
+
+          <div 
+            *ngIf="selectedGoal && depositAmount > (selectedGoal.targetAmount - (selectedGoal.currentAmount || 0)) + 0.01" 
+            class="error-msg"
+          >
+            <span class="material-icons-outlined">error_outline</span>
+            <span>You are trying to deposit more than the target goal requires.</span>
+          </div>
+
+          <div class="modal-buttons">
+            <button 
+              type="button" 
+              class="btn btn-secondary flex-1" 
+              (click)="closeDepositModal()"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-primary flex-2" 
+              [disabled]="!isValidDeposit() || isDepositing"
+            >
+              <span *ngIf="!isDepositing">Confirm Fund</span>
+              <span *ngIf="isDepositing" class="spinner"></span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>

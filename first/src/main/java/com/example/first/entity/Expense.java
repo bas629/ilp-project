@@ -1,41 +1,28 @@
 package com.example.first.entity;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Getter
-@Setter
+@Table(name = "expenses")
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "expenses")
+@Builder
 public class Expense {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long expenseId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private String title;
-
     private Double amount;
-
-    private String category;
-
+    private String category; // Food, Travel, Shopping, Bills, Entertainment, Medical, Others
+    private String transactionType; // CREDIT or DEBIT
     private LocalDate expenseDate;
-
-    // ================= RELATION =================
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User usertemp;
-
-
-
-
-
-
 }
