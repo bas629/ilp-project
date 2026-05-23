@@ -1,199 +1,419 @@
-# Financial Wellness & Smart Investment Tracker - Complete Project Documentation
-
-This documentation provides a comprehensive, deep-dive overview of the **Financial Wellness & Smart Investment Tracker** application. It details the architecture, backend models, simulated engines, wellness scoring logic, REST APIs, frontend layout systems, and the automated E2E verification suite.
+# FinWell – Financial Wellness & Smart Investment Tracker
+### Complete Project Documentation
 
 ---
 
 ## 🗺️ System Overview & Architecture
 
-The application is built on a modern distributed architecture comprising a **Spring Boot 3.5.14 Backend** communicating with an **Angular 17 Frontend** via RESTful APIs and real-time **WebSockets (STOMP over SockJS)**. The database layer utilizes an in-memory **H2 Database** for rapid seeding and volatile simulation cycles.
+**FinWell** is a full-stack financial management platform built on a modern distributed architecture:
+
+- **Backend**: Spring Boot 3.5.14 (Java 21) with Spring Security (JWT), JPA/Hibernate, WebSockets (STOMP over SockJS)
+- **Frontend**: Angular 17 (Standalone Components, Reactive Forms, Lazy Routing)
+- **Database**: H2 In-Memory (volatile — resets on server restart; ideal for simulation)
+- **Real-time**: Spring `@Scheduled` market simulation engine broadcasting via WebSocket topics
 
 ```mermaid
 graph TD
-    A[Angular 17 SPA] -->|REST APIs| B[Spring Boot API Gate]
-    A -->|WebSocket Subscription| C[Market Simulation WebSockets]
-    B -->|JPA/Hibernate| D[H2 Database]
-    E[Spring Scheduler Engine] -->|Simulates Ticks| C
-    E -->|Persists History| D
-    B -->|Wellness Heuristics| F[Financial Wellness Service]
+    A[Angular 17 SPA - localhost:4200] -->|REST APIs + JWT| B[Spring Boot API - localhost:8080]
+    A -->|WebSocket STOMP| C[Market Simulation Engine]
+    B -->|JPA/Hibernate| D[H2 In-Memory DB]
+    E[Spring Scheduler - 10s ticks] --> C
+    E -->|Persists price history| D
+    B --> F[WellnessService - Heuristic Scoring]
+    B --> G[TradeService - Buy/Sell Stocks & Gold]
+    B --> H[ExpenseService - Wallet Ledger]
 ```
 
-### Key Functional Capabilities
-1. **Real-time Mock Stock Exchange**: Ticks simulated stock prices every 10 seconds, maintaining a 15-tick visual sparkline buffer.
-2. **Digital Gold Asset Spot Trading**: Supports purchase/redemption of gold reserves with flashing price cards and trend tracking.
-3. **Smart Expense Manager**: Financial ledger showing credits/debits, spending breakdowns, month-based searching, and transaction type sorting.
-4. **Net Worth Goal Tracker**: Targets that evaluate completion thresholds dynamically based on total net worth (Cash + Stocks + Gold).
-5. **Heuristic Wellness Profiler**: AI-style diagnostics rating user habits based on diversification index, savings ratio, and budget adherence.
-6. **Robust Security center**: Programmatic strong password checks (length >= 8, uppercase, lowercase, numbers, special characters) with a dedicated update screen.
+### GitHub Repository
+- **URL**: https://github.com/bas629/ilp-project
+- **Branch**: `main`
+
+---
+
+## 📁 Project Structure
+
+```
+Basu/
+├── first/                          # Spring Boot Backend
+│   ├── src/main/java/com/example/first/
+│   │   ├── config/                 # JWT, Security, WebSocket config
+│   │   ├── controller/             # REST API controllers
+│   │   ├── Dto/                    # Request/Response DTOs
+│   │   ├── entity/                 # JPA Entities
+│   │   ├── repo/                   # Spring Data JPA Repositories
+│   │   └── service/                # Business logic services
+│   ├── src/main/resources/
+│   │   └── application.properties  # H2 DB config, CORS, JWT secret
+│   └── pom.xml                     # Maven dependencies
+│
+├── frontend/                       # Angular 17 Frontend
+│   ├── src/app/
+│   │   ├── components/             # Feature screen components
+│   │   │   ├── landing-page/
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   ├── layout/             # App shell with sidebar navigation
+│   │   │   ├── summary/            # Dashboard / Net Worth overview
+│   │   │   ├── expense-manager/    # Wallet ledger with filters
+│   │   │   ├── stock-market/       # Mock stock exchange
+│   │   │   ├── gold-investment/    # Digital gold trading
+│   │   │   ├── goal-tracker/       # Savings goals
+│   │   │   ├── portfolio/          # Portfolio & wellness score
+│   │   │   └── change-password/    # Standalone security screen
+│   │   ├── core/
+│   │   │   ├── auth.service.ts     # Login/Register/JWT token management
+│   │   │   ├── auth.guard.ts       # Route protection
+│   │   │   ├── auth.interceptor.ts # Attaches Bearer token to every HTTP request
+│   │   │   ├── websocket.service.ts
+│   │   │   └── notification.service.ts
+│   │   ├── api.service.ts          # Centralized HTTP API calls
+│   │   ├── app.routes.ts           # Lazy-loaded route definitions
+│   │   └── styles.css              # Global design tokens (dark glassmorphism)
+│   ├── angular.json
+│   └── package.json
+│
+├── project_documentation.md        # This file
+└── .gitignore
+```
 
 ---
 
 ## 🗄️ Database Schema & Domain Entities
 
-All databases are structured around relational JPA annotations in Spring Boot.
+All entities use JPA annotations and are auto-created by Hibernate on startup (`spring.jpa.hibernate.ddl-auto=create-drop`).
 
-### 1. `User` Entity
-Represents the account model. Seeding maps a starter cash wallet balance.
-* **Fields**:
-  * `userId` (Long, PK, Auto)
-  * `name` (String, NotBlank)
-  * `email` (String, Unique, NotBlank)
-  * `mobileNo` (String, NotBlank)
-  * `password` (String, Encoded)
-  * `role` (String, default "ROLE_USER")
+### 1. `User`
+Core account entity.
+| Field | Type | Notes |
+|---|---|---|
+| `userId` | Long (PK, Auto) | Primary key |
+| `name` | String | Required |
+| `email` | String (Unique) | Login identifier |
+| `mobileNo` | String | Required |
+| `password` | String | BCrypt encoded |
+| `role` | String | Default: `ROLE_USER` |
 
-### 2. `Stock` Entity
-Represents a listed company available for trading.
-* **Fields**:
-  * `stockId` (Long, PK, Auto)
-  * `companyName` (String)
-  * `sector` (String) - e.g., Tech, Banking, Energy
-  * `currentPrice` (Double)
-  * `previousPrice` (Double)
-  * `marketCap` (Double)
-  * `riskPercent` (Double) - Low (0–3%), Medium (4–7%), High (8–15%), Speculative (>15%)
-  * `volatility` (Double)
-  * `stockStatus` (String) - ACTIVE / SUSPENDED
+> ⚠️ **Welcome Balance**: Only `test@example.com` receives a ₹50,000 seeded credit on registration. All other new users start with ₹0.
 
-### 3. `BuyStock` (StockHoldings) Entity
-Represents shares currently owned by a user.
-* **Fields**:
-  * `holdingId` (Long, PK, Auto)
-  * `quantity` (Integer)
-  * `avgBuyPrice` (Double)
-  * `totalCost` (Double)
-  * `stock` (ManyToOne -> Stock)
-  * `user` (ManyToOne -> User)
+---
 
-### 4. `GoldInvestment` & `GoldHistory` Entities
-Represents user commodity reserves and tick histories.
-* **Fields (`GoldInvestment`)**:
-  * `goldId` (Long, PK, Auto)
-  * `grams` (Double)
-  * `totalCost` (Double)
-  * `user` (OneToOne -> User)
-* **Fields (`GoldHistory`)**:
-  * `historyId` (Long, PK, Auto)
-  * `oldPrice` (Double)
-  * `newPrice` (Double)
-  * `updatedAt` (LocalDateTime)
+### 2. `Stock`
+Listed companies available for simulated trading.
+| Field | Type | Notes |
+|---|---|---|
+| `stockId` | Long (PK) | — |
+| `companyName` | String | e.g., TCS, HDFC Bank |
+| `sector` | String | Tech, Banking, Energy, etc. |
+| `currentPrice` | Double | Updated every 10s |
+| `previousPrice` | Double | Last tick price |
+| `marketCap` | Double | — |
+| `riskPercent` | Double | Low 0–3%, Med 4–7%, High 8–15%, Spec >15% |
+| `volatility` | Double | Magnitude of price movement |
+| `stockStatus` | String | `ACTIVE` / `SUSPENDED` |
 
-### 5. `Goal` Entity
-Target savings milestones established by users.
-* **Fields**:
-  * `goalId` (Long, PK, Auto)
-  * `goalName` (String, NotBlank)
-  * `targetAmount` (Double)
-  * `currentAmount` (Double) - Overwritten dynamically by Wellness Net Worth logic
-  * `deadline` (LocalDate)
-  * `status` (String) - ACTIVE / ACHIEVED
-  * `user` (ManyToOne -> User)
+---
 
-### 6. `Expense` Entity
-The wallet transaction ledger history.
-* **Fields**:
-  * `expenseId` (Long, PK, Auto)
-  * `title` (String)
-  * `amount` (Double)
-  * `category` (String) - e.g., FOOD, TRAVEL, BILLS, SHOPPING, MEDICAL, SAVINGS, CREDIT, STOCKS, GOLD
-  * `transactionType` (String) - CREDIT (Inflow) / DEBIT (Outflow)
-  * `expenseDate` (LocalDate)
-  * `user` (ManyToOne -> User)
+### 3. `BuyStock` (Holdings)
+Shares currently owned by a user.
+| Field | Type | Notes |
+|---|---|---|
+| `holdingId` | Long (PK) | — |
+| `quantity` | Integer | Shares held |
+| `buyPrice` | Double | Average purchase price |
+| `totalPrice` | Double | Total cost basis |
+| `stock` | ManyToOne → Stock | — |
+| `user` | ManyToOne → User | — |
+
+---
+
+### 4. `GoldInvestment` & `GoldHistory`
+User gold reserves and price tick history.
+
+**GoldInvestment**:
+| Field | Type | Notes |
+|---|---|---|
+| `goldId` | Long (PK) | — |
+| `goldAmount` | Double | Grams held |
+| `currentGoldPrice` | Double | Price at purchase time |
+| `user` | ManyToOne → User | — |
+
+**GoldHistory**: Stores `oldPrice`, `newPrice`, `updatedAt` for sparkline charts.
+
+---
+
+### 5. `Goal`
+User savings targets.
+| Field | Type | Notes |
+|---|---|---|
+| `goalId` | Long (PK) | — |
+| `goalName` | String | Required |
+| `targetAmount` | Double | Goal target in ₹ |
+| `currentAmount` | Double | Amount deposited so far |
+| `deadline` | LocalDate | Target date |
+| `status` | String | `ACTIVE` / `ACHIEVED` |
+| `user` | ManyToOne → User | — |
+
+---
+
+### 6. `Expense` (Wallet Ledger)
+Every financial transaction recorded.
+| Field | Type | Notes |
+|---|---|---|
+| `expenseId` | Long (PK) | — |
+| `title` | String | Description |
+| `amount` | Double | ₹ value |
+| `category` | String | FOOD, TRAVEL, BILLS, SHOPPING, MEDICAL, SAVINGS, CREDIT, STOCKS, GOLD, ENTERTAINMENT, OTHERS |
+| `transactionType` | String | `CREDIT` (inflow) / `DEBIT` (outflow) |
+| `expenseDate` | LocalDate | Date of transaction |
+| `user` | ManyToOne → User | — |
 
 ---
 
 ## ⚙️ Core Engines & Algorithms
 
 ### 1. Market Simulation Engine (`MarketSimulationEngine.java`)
-Runs a background thread using `@Scheduled(fixedRate = 10000)` to execute market ticks every 10 seconds:
-* **Fluctuation Logic**: Applies a random Gaussian walk modified by active `MarketEvent` catalysts (e.g. "Tech Boom" increases tech stock prices by 5-10%).
-* **Sparkline History**: Maintains the latest 15 price points inside the `StockHistory` repository to allow frontend SVG rendering.
-* **WebSocket Feeds**: Broadcasts JSON updates instantly to subscribers:
-  * `/topic/market/stocks` -> Array of updated Stock listings.
-  * `/topic/market/gold` -> Gold price updates, previous prices, and trend directions.
-  * `/topic/market/events` -> Triggered market news flashes.
-
-### 2. Financial Wellness Diagnostic Algorithm (`WellnessService.java`)
-Generates the overall financial score (0-100) using four weighted heuristic rules:
-1. **Savings Ratio (30% weight)**:
-   * Formulas: `Savings = Inflows - Outflows`.
-   * `Score = (Savings / Inflows) * 100`. Ideal target is >= 30%.
-2. **Budget Adherence (30% weight)**:
-   * Standard caps are mapped per expense category: `FOOD: ₹8,000`, `TRAVEL: ₹10,000`, `SHOPPING: ₹12,000`, `BILLS: ₹15,000`, `ENTERTAINMENT: ₹6,000`, `MEDICAL: ₹20,000`.
-   * For every category limit breached, 15 points are deducted from this sub-score.
-3. **Investment Diversification (20% weight)**:
-   * Measures allocation ratios across Cash, Stocks, and Gold.
-   * Uses Shannon entropy calculations:
-     $$\text{Entropy} = -\sum (p_i \cdot \ln(p_i))$$
-     Where $p_i$ is the share of asset class $i$ in the total net worth. Perfect diversification yields a score of 100.
-4. **Goal Progress (20% weight)**:
-   * Average achievement percentage of all active savings goals.
-
-### 3. Portfolio Risk Calculation (`WellnessService.java`)
-Calculates the aggregate risk index of a user's total net worth using a weighted volatility formula:
-* **Weighted Stock Risk**: For each active stock holding, we compute its current market value (`currentPrice * quantity`) and multiply by its seeded company volatility risk percentage (`riskPercent`):
-  $$\text{Weighted Stock Risk Sum} = \sum (\text{Current Stock Value} \times \text{Company Volatility Risk \%})$$
-* **Weighted Gold Risk**: Gold assets carry a stable baseline risk of **5%**:
-  $$\text{Gold Weighted Risk} = \text{Gold Holdings Value} \times 5.0$$
-* **Weighted Cash Risk**: Cash balances hold a volatility risk of **0%**, meaning liquid funds do not contribute to risk calculations.
-* **Portfolio Risk Percentage**: Divided by the user's total net worth (Cash + Stocks + Gold) and rounded to 2 decimal places:
-  $$\text{Portfolio Risk} = \frac{\text{Weighted Stock Risk Sum} + \text{Gold Weighted Risk}}{\text{Total Net Worth}}$$
-
+Runs via `@Scheduled(fixedRate = 10000)` — every 10 seconds:
+- Applies a **random Gaussian walk** to each stock's current price modified by active `MarketEvent` catalysts (e.g., "Tech Boom" pushes tech stocks +5–10%).
+- Saves each tick to `StockHistory` (last 15 ticks kept for sparkline rendering).
+- Broadcasts via WebSocket:
+  - `/topic/market/stocks` → updated stock listings
+  - `/topic/market/gold` → gold price + trend direction
+  - `/topic/market/events` → market news flashes
 
 ---
 
-## 🌐 REST API Endpoints
+### 2. Portfolio Risk Calculation (`WellnessService.java`)
 
-### 🔐 Authentication Controller (`/api/auth`)
-* `POST /register`: Registers a new user. Enforces strong validation patterns and seeds ₹50,000 welcome cash.
-* `POST /login`: Validates credentials and returns a Bearer JWT Token.
-* `POST /change-password`: Accepts DTO containing `oldPassword` and `newPassword`. Validates complexity and updates password database credentials.
+```
+Portfolio Risk % = (Σ(StockCurrentValue × StockRiskPercent) + GoldValue × 5.0) / netWorthDivisor
+```
 
-### 💰 Expense & Ledger Controller (`/api/expenses`)
-* `GET /`: Retrieves sorted wallet transaction history.
-* `GET /balance`: Returns current liquid wallet balance (Sum of Credits - Sum of Debits).
-* `POST /`: Logs a credit or debit.
-* `DELETE /{id}`: Deletes a ledger entry, restoring the cash impact.
-
-### 📈 Stock Exchange Controller (`/api/stocks`)
-* `GET /`: Returns all listed stocks.
-* `POST /trade`: Executes a trade order.
-  * DTO: `{ stockId: Long, quantity: Integer, action: "BUY" | "SELL" }`.
-  * Deducts/Refunds cash wallet balance and adds transaction credits/debits.
-
-### 🏆 Goal Controller (`/api/goals`)
-* `GET /`: Returns goals mapping user net worth to `currentAmount` dynamically.
-* `POST /`: Establishes a new savings milestone.
-* `POST /{id}/deposit`: Funds a target goal from cash wallet reserves.
-* `DELETE /{id}`: Cancels a goal, refunding accumulated deposits back to the cash wallet.
+- **Cash**: 0% risk contribution
+- **Gold**: Fixed 5% risk rate
+- **Stocks**: Each stock's own `riskPercent` field, weighted by current market value
+- `netWorthDivisor` is a separate variable (`1.0` when netWorth = 0) to avoid division-by-zero **without corrupting the displayed net worth value** (fixes the ₹1 display bug)
 
 ---
 
-## 🎨 Angular Frontend Component Architecture
+### 3. Financial Wellness Scoring Algorithm
 
-All components are standalone Angular components loaded via lazy-routing configurations in [app.routes.ts](file:///c:/Users/91708/Desktop/Basu/frontend/src/app/app.routes.ts).
+Generates a score (0–100) from four equally weighted (25% each) heuristic rules:
 
-### 1. Landing, Login, & Registration Pages
-* **Landing Page**: Features marketing metrics and CTA pathways formatted in ₹.
-* **Register**: Implements FormBuilder Reactive validators. Features a dynamic checklist panel that evaluates password characters in real-time (capital, lower, number, special symbol, minLength).
+| Component | Formula | Target |
+|---|---|---|
+| **Savings Ratio** | `(Credits - Debits) / Credits × 100` | ≥ 30% |
+| **Budget Adherence** | Start 100, −15 per breached category | No breaches |
+| **Diversification** | `100 × (1 − Σwᵢ²)` where wᵢ = asset weight | Hold all 3 asset types |
+| **Goal Progress** | Average `(currentAmount / targetAmount) × 100` across all goals | 100% completion |
 
-### 2. Expense Manager Screen
-* **Ledger Filter Row**: Contains two filters:
-  * **Search by Month**: Month picker (`<input type="month">`) filtering table rows and updating charts.
-  * **Sort By dropdown**: Limited specifically to "Credit First" and "Debit First" to sort inflows or outflows.
-* **Breakdown Panel**: doughnut chart with an adjacent colored table legend displaying category sums and percentage shares.
+**Score Bands**:
+- 80–100 → `EXCELLENT`
+- 60–79 → `GOOD`
+- 40–59 → `FAIR`
+- 0–39 → `POOR`
 
-### 3. Stock Exchange Screen
-* **Company Search Bar**: Enlarged search input box styled with a width expansion (`flex: 3.5`, `min-width: 350px`) for high visibility.
-* **Badges & Tooltips**: Dynamic volatility badge tooltips displaying exact percentages and color categories.
-* **Trade Confirmation overlay**: Transaction modal calculating total costs in real-time and checking wallet limits.
+**Budget Category Caps** (soft limits):
+| Category | Monthly Cap |
+|---|---|
+| FOOD | ₹1,500 |
+| ENTERTAINMENT | ₹800 |
+| SHOPPING | ₹1,200 |
+| UTILITIES | ₹1,000 |
+| TRAVEL | ₹2,000 |
+| OTHERS | ₹1,500 |
 
-### 4. Digital Gold Page
-* **WebSocket ticks**: Features flashing green/red animations when updates occur. Displays trend markers (▲/▼) and price cycle statistics.
+---
 
-### 5. Security Center (`/change-password`)
-* Dedicated standalone screen containing Reactive Form password controls, ensuring users can update passwords securely away from other panels.
+## 🌐 REST API Reference
 
-## 🤖 E2E Verification Suite Status
+### 🔐 Auth (`/api/auth`)
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/register` | Register new user. Only `test@example.com` gets ₹50,000 seed. |
+| POST | `/login` | Returns JWT Bearer token + user info |
+| POST | `/change-password` | Updates password after verifying old password |
 
-The Playwright visual E2E verifier agent and its dependencies (previously inside `verification-agent/`) have been **completely removed** from the repository to clean up the codebase. Code compliance, routing rules, and responsive styling have been validated manually.
+---
+
+### 💰 Expense Ledger (`/api/expenses`)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | All transactions for authenticated user |
+| GET | `/balance` | Net cash balance (Credits − Debits) |
+| POST | `/` | Log a new credit or debit |
+| DELETE | `/{id}` | Delete transaction (reverses balance impact) |
+
+---
+
+### 📈 Stock Exchange (`/api/stocks`)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | All listed stocks with price history |
+| POST | `/trade` | Execute BUY/SELL: `{ stockId, quantity, action }` |
+
+---
+
+### 🥇 Gold (`/api/gold`)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/price` | Current gold price per gram |
+| POST | `/trade` | Buy/Sell gold: `{ grams, action }` |
+| GET | `/holdings` | User's gold holdings |
+
+---
+
+### 🎯 Goals (`/api/goals`)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/` | All goals for user |
+| POST | `/` | Create new goal |
+| POST | `/{id}/deposit` | Deposit ₹ amount into goal |
+| DELETE | `/{id}` | Delete goal, refund deposits |
+
+---
+
+### 📊 Portfolio & Wellness (`/api/portfolio`)
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/wellness` | Full portfolio DTO: cash, stocks, gold, net worth, risk %, diversification score |
+| GET | `/financial-profile` | Wellness score, savings, recommendations |
+
+---
+
+## 🎨 Angular Frontend Architecture
+
+All components are **standalone** (no NgModule), loaded lazily via `app.routes.ts`.
+
+### Design System
+- **Theme**: Dark glassmorphism — `#0f172a` base, frosted glass cards
+- **Typography**: `Plus Jakarta Sans` (local, via `@fontsource/plus-jakarta-sans` — no CDN)
+- **Icons**: `Material Icons` (local, via `material-icons` npm package — no CDN)
+- **Animations**: CSS keyframe micro-animations, hover transforms
+
+> All assets are served **locally with no internet dependency**.
+
+---
+
+### Screen Breakdown
+
+#### 1. Landing Page (`/`)
+Marketing hero page with feature highlights. CTA redirects to `/register`.
+
+#### 2. Register (`/register`)
+Reactive Form with real-time password strength checklist:
+- ≥ 8 characters, uppercase, lowercase, number, special character
+- Live visual checklist updates as user types
+
+#### 3. Login (`/login`)
+JWT-based login. Token stored in `localStorage`. Auth guard protects all `/app` routes.
+
+#### 4. Dashboard / Summary (`/app/summary`)
+Overview cards: Total Net Worth, Cash Balance, Stock Value, Gold Value.
+
+> **Bug Fixed**: When a new user has ₹0 in all assets, Net Worth now correctly shows ₹0 (not ₹1 — caused by a division-by-zero guard overwriting the real value).
+
+#### 5. Expense Manager (`/app/expenses`)
+- **Month Filter**: `<input type="month">` — filters ledger rows by selected month
+- **Sort By**: Dropdown limited to "Credit First" / "Debit First"
+- **Breakdown Chart**: Doughnut chart showing category spending shares
+- **Ledger Table**: All transactions with type badge (CREDIT/DEBIT)
+
+#### 6. Stock Exchange (`/app/stocks`)
+- **Company Search**: Large, prominent search bar (`min-width: 350px`)
+- **Live Sparklines**: SVG price history charts per stock (last 15 ticks)
+- **Trade Modal**: Real-time cost calculation, wallet balance check before confirming
+
+#### 7. Digital Gold (`/app/gold`)
+- Real-time price card with flash animations on tick updates
+- Trend indicator (▲/▼) with direction color coding
+- Buy/Sell form with gram input
+
+#### 8. Goal Tracker (`/app/goals`)
+- Create goals with target amounts and deadlines
+- Deposit from wallet into goals
+- Progress bar showing `currentAmount / targetAmount`
+
+#### 9. Portfolio (`/app/portfolio`)
+- Net worth breakdown (Cash / Stocks / Gold)
+- Portfolio Risk % and Diversification Score
+- Holdings table with P&L per stock
+
+#### 10. Change Password (`/app/change-password`)
+- **Standalone screen** (separated from Portfolio)
+- Reactive Form: old password + new password + confirm
+- Same strength validation as registration
+
+---
+
+## 🔐 Security
+
+- **JWT Authentication**: Tokens signed with HS256, validated on every request via `JwtFilter`
+- **Password Encoding**: BCrypt (Spring Security)
+- **CORS**: Configured to allow `http://localhost:4200`
+- **Route Guards**: `AuthGuard` redirects unauthenticated users to `/login`
+
+---
+
+## 🛠️ Developer Setup
+
+### Prerequisites
+- Java 21+
+- Node.js 18+
+- Maven (or use the included `mvnw` wrapper)
+
+### Running the Backend
+```bash
+cd first
+./mvnw spring-boot:run
+# Server starts at http://localhost:8080
+# DevTools enabled — auto-restarts on class changes
+```
+
+### Running the Frontend
+```bash
+cd frontend
+npm install
+npm run start
+# App served at http://localhost:4200
+```
+
+### Demo Account
+| Email | Password | Notes |
+|---|---|---|
+| `test@example.com` | `Test@1234` | Pre-seeded with ₹50,000 balance |
+
+---
+
+## 📦 Key Dependencies
+
+### Backend (`pom.xml`)
+| Dependency | Purpose |
+|---|---|
+| `spring-boot-starter-web` | REST API |
+| `spring-boot-starter-data-jpa` | ORM / H2 |
+| `spring-boot-starter-security` | Auth |
+| `spring-boot-starter-websocket` | Real-time market |
+| `spring-boot-starter-validation` | Input validation |
+| `spring-boot-devtools` | Auto-restart on code changes |
+| `jjwt` (0.11.5) | JWT generation & validation |
+| `lombok` | Boilerplate reduction |
+| `h2` | In-memory database |
+
+### Frontend (`package.json`)
+| Package | Purpose |
+|---|---|
+| `@angular/core` 17 | Framework |
+| `@fontsource/plus-jakarta-sans` | Offline font |
+| `material-icons` | Offline Material Icons |
+| `rxjs` | Reactive streams |
+| `sockjs-client` + `@stomp/stompjs` | WebSocket client |
+
+---
+
+## 🗒️ Known Behaviours & Notes
+
+- **H2 In-Memory DB**: All data is lost on server restart. This is by design for simulation purposes.
+- **DevTools**: Backend auto-restarts when Java classes are recompiled. Frontend uses `ng serve` hot-reload.
+- **Stock Prices**: Entirely simulated — not real market data.
+- **Gold Price**: Simulated with a Gaussian random walk, starts at a realistic base (≈ ₹6,000/gram).
+- **Welcome Balance**: Only `test@example.com` receives ₹50,000 on registration. All other users start at ₹0.

@@ -1,0 +1,29 @@
+# Node binaries (bundled with workspace tooling)
+.node/
+
+# Frontend build output
+frontend/dist/
+frontend/.angular/
+
+# Node modules
+frontend/node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Spring Boot build output
+first/target/
+
+# Logs
+*.log
+*.stackdump
+
+# Environment / secrets
+*.env
+application-local.properties
