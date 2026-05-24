@@ -1,0 +1,96 @@
+<div class="page-content">
+
+  <div *ngIf="deleteSuccess()" class="alert alert-success mb-14">
+    <i class="ti ti-check" aria-hidden="true"></i> {{ deleteSuccess() }}
+  </div>
+  <div *ngIf="error()" class="alert alert-danger mb-14">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ error() }}
+  </div>
+
+  <!-- Confirm delete overlay -->
+  <div *ngIf="confirmDeleteId()" style="background:rgba(0,0,0,0.3);position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center">
+    <div class="card" style="max-width:340px;width:100%">
+      <div class="card-title">Delete record?</div>
+      <p style="font-size:13px;color:#6B7280;margin-bottom:16px">
+        This will permanently remove the record and cannot be undone.
+      </p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger btn-sm" (click)="confirmDeleteRecord()">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <div class="tab" [class.active]="activeTab()==='all'"        (click)="setTab('all')">All ({{ allRecords.length }})</div>
+    <div class="tab" [class.active]="activeTab()==='income'"     (click)="setTab('income')">Income</div>
+    <div class="tab" [class.active]="activeTab()==='expense'"    (click)="setTab('expense')">Expense</div>
+    <div class="tab" [class.active]="activeTab()==='investment'" (click)="setTab('investment')">Investment</div>
+  </div>
+
+  <!-- Search -->
+  <div class="flex-row mb-14" style="flex-wrap:wrap;gap:8px">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      placeholder="Search by title or category..."
+      style="flex:1;min-width:200px;padding:8px 12px;font-size:13px;border:1px solid rgba(0,0,0,0.12);border-radius:8px;outline:none" />
+  </div>
+
+
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="empty-state">
+    <i class="ti ti-loader" aria-hidden="true"></i>
+    <p>Loading records...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading() && filteredRecords.length === 0" class="empty-state">
+    <i class="ti ti-receipt" aria-hidden="true"></i>
+    <p>No financial records found.</p>
+  </div>
+
+  <!-- Table -->
+  <div class="card" *ngIf="!loading() && filteredRecords.length > 0">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:90px">Date</th>
+            <th style="width:80px">Type</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th style="width:100px">Amount</th>
+            <th style="width:60px" class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let record of filteredRecords">
+            <td>{{ record.expenseDate }}</td>
+            <td>
+              <span class="badge" [ngClass]="isIncome(record) ? 'badge-income' : isInvestment(record) ? 'badge-invest' : 'badge-expense'">
+                {{ isIncome(record) ? 'Income' : isInvestment(record) ? 'Invest' : 'Expense' }}
+              </span>
+            </td>
+            <td>{{ record.title }}</td>
+            <td>{{ record.category }}</td>
+            <td [style.color]="isIncome(record) ? '#3B6D11' : '#A32D2D'" style="font-weight:500">
+              {{ isIncome(record) ? '+' : '-' }}{{ record.amount | inr }}
+            </td>
+            <td class="actions-col">
+              <button class="btn-icon danger" (click)="askDelete(record.expenseId!)" aria-label="Delete">
+                <i class="ti ti-trash" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:#9CA3AF">
+      Showing {{ filteredRecords.length }} of {{ allRecords.length }} records
+    </div>
+  </div>
+
+</div>

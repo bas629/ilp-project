@@ -1,0 +1,46 @@
+.ack-page {
+  min-height: 100vh;
+  background: #F4F6F9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ack-card {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  padding: 40px 32px;
+
+  .ack-icon {
+    font-size: 52px;
+    color: #3B6D11;
+    margin-bottom: 16px;
+  }
+
+  h2 { margin-bottom: 8px; }
+  p  { margin-bottom: 24px; }
+}
+
+.ack-details {
+  background: #F8F9FA;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.ack-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  &:last-child { border-bottom: none; }
+}
+
+.ack-label { font-size: 12px; color: #6B7280; }
+.ack-value { font-size: 13px; font-weight: 500; }
+
+.w-full { width: 100%; justify-content: center; }

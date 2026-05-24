@@ -1,0 +1,9 @@
+.score-card { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.score-display { font-size: 80px; font-weight: 700; line-height: 1; margin: 16px 0 10px; }
+.rec-list { display: flex; flex-direction: column; gap: 10px; }
+.rec-item { margin-bottom: 0; }
+.mt-20 { margin-top: 20px; }
+.stat-row { display: flex; gap: 16px; margin-top: 16px; }
+.stat-item { flex: 1; background: #F8F9FA; border-radius: 8px; padding: 10px 12px; }
+.stat-label { font-size: 11px; color: #6B7280; margin-bottom: 4px; }
+.stat-val { font-size: 14px; font-weight: 600; }

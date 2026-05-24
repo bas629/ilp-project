@@ -1,0 +1,162 @@
+<div class="page-content">
+
+  <!-- ══ INSUFFICIENT BALANCE DIALOG ══════════════════════ -->
+  <div *ngIf="insufficientBalanceMsg()"
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:250;
+              display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+    <div class="card" style="max-width:420px;width:100%;border:2px solid #ef4444;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fee2e2;
+                    display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:24px">
+          <i class="ti ti-wallet"></i>
+        </div>
+        <div>
+          <h3 style="margin:0;color:#1e293b;font-size:16px;font-weight:700">Insufficient Wallet Balance</h3>
+          <span style="font-size:12px;color:#ef4444;font-weight:500">Gold Purchase Declined</span>
+        </div>
+      </div>
+      <p style="font-size:14px;color:#475569;line-height:1.6;margin:0 0 20px 0;background:#f8fafc;padding:12px;border-radius:8px;border-left:4px solid #ef4444">
+        {{ insufficientBalanceMsg() }}
+      </p>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline" (click)="insufficientBalanceMsg.set('')">Close</button>
+        <button class="btn btn-primary" routerLink="/app/expenses" (click)="insufficientBalanceMsg.set('')"
+                style="background:linear-gradient(90deg,#ef4444,#dc2626);border:none">
+          <i class="ti ti-plus"></i> Add Income
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buy gold dialog overlay -->
+  <div class="modal-backdrop" *ngIf="buyType() !== null" 
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;
+              display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px)">
+    <div class="card" style="max-width:360px;width:100%;background:#fff;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15)">
+      <div class="card-title" style="font-size:15px;font-weight:600;margin-bottom:12px">Buy {{ buyType() }} Gold</div>
+      
+      <div style="font-size:13px;color:#4B5563;margin-bottom:14px">
+        Current price: <strong style="color:#d97706">{{ buyPrice() | inr }}/g</strong>
+      </div>
+
+      <div class="form-group mb-14">
+        <label style="font-weight:500;font-size:11px">Grams to Purchase *</label>
+        <input type="number" [(ngModel)]="buyGrams" step="0.01" min="0.01" placeholder="e.g. 2.5" 
+               style="width:100%;padding:8px 10px;font-size:13px;border:1px solid #d1d5db;border-radius:6px;outline:none" />
+      </div>
+
+      <!-- Cost calculation -->
+      <div *ngIf="buyGrams() && buyGrams()! > 0" 
+           style="background:#f3f4f6;border-radius:6px;padding:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:12px">
+        <span style="color:#4b5563">Estimated Cost:</span>
+        <span style="font-weight:700;color:#10b981;font-size:14px">{{ (buyGrams()! * buyPrice()) | inr }}</span>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" (click)="closeBuyDialog()">Cancel</button>
+        <button class="btn btn-primary btn-sm" [disabled]="!buyGrams() || buyGrams()! <= 0 || saving()" (click)="confirmBuy()">
+          {{ saving() ? 'Buying...' : 'Confirm Buy' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="toast()" class="alert mb-14"
+       [class.alert-success]="toast()!.type === 'ok'" [class.alert-danger]="toast()!.type === 'err'">
+    <i class="ti" [class.ti-check]="toast()!.type === 'ok'" [class.ti-alert-circle]="toast()!.type === 'err'"></i>
+    {{ toast()!.msg }}
+  </div>
+
+  <!-- Metric Cards -->
+  <div class="row-4 mb-20">
+    <app-metric-card label="Total Gold (g)"   [value]="metricTotalGrams" icon="ti-coin"        colorClass="amber" [isCurrency]="false" />
+    <app-metric-card label="Amount Invested"  [value]="metricInvested"   icon="ti-coins"        colorClass="blue" />
+    <app-metric-card label="Current Value"    [value]="metricCurrent"    icon="ti-chart-bar"    colorClass="teal" />
+    <app-metric-card label="Total P&L"        [value]="metricPnL"        icon="ti-trending-up"  [colorClass]="metricPnL >= 0 ? 'green' : 'red'" />
+  </div>
+
+  <!-- Live Market Section -->
+  <div class="card mb-20">
+    <div class="card-title">Live Gold Market Rates</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:10px">
+      <!-- Digital Gold -->
+      <div style="border:1px solid rgba(0,0,0,0.06);border-radius:10px;padding:16px;text-align:center;background:#fff">
+        <div style="font-weight:600;font-size:14px;margin-bottom:8px">Digital Gold</div>
+        <div style="font-size:22px;font-weight:700;color:#d97706;margin-bottom:12px">
+          {{ (marketPrices() ? marketPrices()!.Digital : 7200.0) | inr }}/g
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="openBuyDialog('Digital', marketPrices() ? marketPrices()!.Digital : 7200.0)">Buy</button>
+      </div>
+
+      <!-- Gold ETF -->
+      <div style="border:1px solid rgba(0,0,0,0.06);border-radius:10px;padding:16px;text-align:center;background:#fff">
+        <div style="font-weight:600;font-size:14px;margin-bottom:8px">Gold ETF</div>
+        <div style="font-size:22px;font-weight:700;color:#3b82f6;margin-bottom:12px">
+          {{ (marketPrices() ? marketPrices()!.ETF : 7056.0) | inr }}/g
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="openBuyDialog('ETF', marketPrices() ? marketPrices()!.ETF : 7056.0)">Buy</button>
+      </div>
+
+      <!-- Sovereign Gold Bond (SGB) -->
+      <div style="border:1px solid rgba(0,0,0,0.06);border-radius:10px;padding:16px;text-align:center;background:#fff">
+        <div style="font-weight:600;font-size:14px;margin-bottom:8px">Sovereign Gold Bond (SGB)</div>
+        <div style="font-size:22px;font-weight:700;color:#8b5cf6;margin-bottom:12px">
+          {{ (marketPrices() ? marketPrices()!.SGB : 6984.0) | inr }}/g
+        </div>
+        <button class="btn btn-primary btn-sm" (click)="openBuyDialog('SGB', marketPrices() ? marketPrices()!.SGB : 6984.0)">Buy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holdings Section -->
+  <div class="card">
+    <div class="card-title">Your Gold Holdings & Investments</div>
+    <div *ngIf="loading()" class="loading-state">Loading holdings...</div>
+    
+    <div class="table-wrap" *ngIf="!loading()">
+      <table class="data-table" *ngIf="holdings().length > 0; else noGold">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Qty Purchased (g)</th>
+            <th>Avg Buy Price / g</th>
+            <th>Live Price / g</th>
+            <th>Total Invested</th>
+            <th>Current Value</th>
+            <th>Net P&L</th>
+            <th>P&L%</th>
+            <th style="text-align:right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of holdings()">
+            <td>
+              <span class="badge" [class.badge-amber]="h.type === 'Digital'" [class.badge-blue]="h.type === 'ETF'" [class.badge-purple]="h.type === 'SGB'">
+                {{ h.type }}
+              </span>
+            </td>
+            <td>{{ h.quantityGrams }}g</td>
+            <td>{{ h.purchasePricePerGram | inr }}</td>
+            <td>{{ h.currentPricePerGram | inr }}</td>
+            <td>{{ h.totalInvestment | inr }}</td>
+            <td>{{ h.currentValue | inr }}</td>
+            <td [style.color]="(h.profitLoss ?? 0) >= 0 ? '#10b981' : '#ef4444'">
+              {{ (h.profitLoss ?? 0) >= 0 ? '+' : '' }}{{ h.profitLoss | inr }}
+            </td>
+            <td [style.color]="(h.profitLossPct ?? 0) >= 0 ? '#10b981' : '#ef4444'" style="font-weight: 700">
+              {{ (h.profitLossPct ?? 0) >= 0 ? '+' : '' }}{{ h.profitLossPct | number:'1.1-2' }}%
+            </td>
+            <td style="text-align:right">
+              <button class="btn btn-outline btn-sm" (click)="sellGold(h)" style="border-color:#ef4444;color:#ef4444;padding:4px 8px;font-size:12px;background:transparent;cursor:pointer">
+                📤 Sell
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noGold>
+        <app-empty-state icon="ti-coin" message="No gold holdings yet. Purchase digital gold from the live market rates above." />
+      </ng-template>
+    </div>
+  </div>
+</div>

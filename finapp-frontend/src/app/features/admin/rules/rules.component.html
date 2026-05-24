@@ -1,0 +1,53 @@
+<div class="page-content">
+
+  <!-- Toast feedback -->
+  <div *ngIf="toast()" 
+       style="position:fixed;top:20px;right:20px;z-index:9999;
+              background:#10b981;color:white;padding:12px 20px;
+              border-radius:8px;box-shadow:0 10px 15px -3px rgba(0,0,0,0.3);
+              display:flex;align-items:center;gap:8px;font-weight:500;">
+    <i class="ti ti-check" style="font-size:18px"></i>
+    <span>{{ toast()!.msg }}</span>
+  </div>
+
+  <div class="flex-between mb-20">
+    <div><h1>Rules & thresholds</h1><p>Configure alert rules for all users.</p></div>
+    <button class="btn btn-primary btn-sm" (click)="saveAll()">
+      <i class="ti ti-device-floppy"></i> Save all rules
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Rule</th>
+            <th>Description</th>
+            <th>Threshold</th>
+            <th>Unit</th>
+            <th>Enabled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rules()">
+            <td><strong>{{ r.name }}</strong></td>
+            <td style="white-space:normal;font-size:12px;color:#6B7280;">{{ r.description }}</td>
+            <td>
+              <input type="number" [value]="r.threshold"
+                     (change)="updateThreshold(r.id, $any($event.target).value)"
+                     style="width:80px;padding:5px 8px;border:1px solid rgba(0,0,0,0.18);border-radius:6px;font-size:13px;">
+            </td>
+            <td>{{ r.unit }}</td>
+            <td>
+              <label class="toggle-switch">
+                <input type="checkbox" [checked]="r.enabled" (change)="toggleRule(r.id)">
+                <span class="slider"></span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

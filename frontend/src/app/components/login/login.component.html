@@ -1,61 +1,88 @@
-<div class="auth-container">
-  <div class="glass-panel auth-card">
-    <div class="auth-header">
-      <div class="logo-icon">
-        <span class="material-icons">query_stats</span>
-      </div>
-      <h1 class="logo-text">FINWELL</h1>
-      <p class="auth-subtitle">Financial Wellness & Smart Tracker</p>
+<div class="auth-page">
+  <!-- LEFT — Login -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon"><i class="ti ti-chart-pie"></i></div>
+      <span class="brand-name">FinWell</span>
     </div>
 
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="auth-form">
-      <div *ngIf="errorMessage" class="error-alert">
-        <span class="material-icons-outlined">error_outline</span>
-        <span class="error-text">{{ errorMessage }}</span>
-      </div>
+    <h2>Welcome back</h2>
+    <p class="auth-sub">Sign in to your FinWell account</p>
 
-      <div class="input-group">
-        <label class="input-label" for="email">Email Address</label>
-        <div class="input-with-icon">
-          <span class="material-icons-outlined input-icon">email</span>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            class="form-control"
-            [(ngModel)]="credentials.email"
-            placeholder="name@example.com"
-            required
-            email
-            #emailInput="ngModel"
-          />
-        </div>
-      </div>
+    <div *ngIf="loginError" class="alert alert-danger mb-14">
+      <i class="ti ti-alert-circle"></i> {{ loginError }}
+    </div>
 
-      <div class="input-group">
-        <label class="input-label" for="password">Password</label>
-        <div class="input-with-icon">
-          <span class="material-icons-outlined input-icon">lock</span>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="form-control"
-            [(ngModel)]="credentials.password"
-            placeholder="••••••••"
-            required
-            #passwordInput="ngModel"
-          />
-        </div>
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="e.g. test@example.com">
+        <span class="form-error" *ngIf="lf['email'].invalid && lf['email'].touched">Valid email required</span>
       </div>
-
-      <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid || isLoading">
-        <span *ngIf="!isLoading">Access Account</span>
-        <span *ngIf="isLoading" class="spinner"></span>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" formControlName="password" placeholder="Enter your password">
+        <span class="form-error" *ngIf="lf['password'].invalid && lf['password'].touched">Password required</span>
+      </div>
+      <button type="submit" class="btn btn-primary w-full" style="margin-top:4px" [disabled]="loginForm.invalid || isLoading">
+        <i class="ti ti-login"></i>
+        {{ isLoading ? 'Signing in…' : 'Sign in' }}
       </button>
+    </form>
+  </div>
 
-      <div class="auth-footer">
-        <p>New to FinWell? <a routerLink="/register">Create an account</a></p>
+  <!-- RIGHT — Register -->
+  <div class="auth-right">
+    <h2>Create account</h2>
+    <p class="auth-sub">New to FinWell? Register below</p>
+
+    <div *ngIf="registerError" class="alert alert-danger mb-14">
+      <i class="ti ti-alert-circle"></i> {{ registerError }}
+    </div>
+    <div *ngIf="registerSuccess" class="alert alert-success mb-14">
+      <i class="ti ti-check"></i> {{ registerSuccess }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input formControlName="name" placeholder="e.g. Arjun Sharma">
+        <span class="form-error" *ngIf="rf['name'].invalid && rf['name'].touched">Name is required</span>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="e.g. arjun@gmail.com">
+        <span class="form-error" *ngIf="rf['email'].invalid && rf['email'].touched">Valid email required</span>
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input formControlName="mobileNo" placeholder="e.g. 9876543210">
+        <span class="form-error" *ngIf="rf['mobileNo'].invalid && rf['mobileNo'].touched">Mobile number required</span>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" formControlName="password" placeholder="Min 8 chars, upper, lower, digit & symbol">
+        <span class="form-error" *ngIf="rf['password'].invalid && rf['password'].touched">
+          Min 8 chars with uppercase, number & special character
+        </span>
+      </div>
+
+      <!-- Password strength checklist -->
+      <div class="pwd-checklist" *ngIf="rf['password'].value">
+        <div [class.ok]="getPasswordRequirements().length"><i class="ti" [class.ti-check]="getPasswordRequirements().length" [class.ti-x]="!getPasswordRequirements().length"></i> Min 8 characters</div>
+        <div [class.ok]="getPasswordRequirements().hasUpper"><i class="ti" [class.ti-check]="getPasswordRequirements().hasUpper" [class.ti-x]="!getPasswordRequirements().hasUpper"></i> Uppercase letter</div>
+        <div [class.ok]="getPasswordRequirements().hasNumber"><i class="ti" [class.ti-check]="getPasswordRequirements().hasNumber" [class.ti-x]="!getPasswordRequirements().hasNumber"></i> Number</div>
+        <div [class.ok]="getPasswordRequirements().hasSpecial"><i class="ti" [class.ti-check]="getPasswordRequirements().hasSpecial" [class.ti-x]="!getPasswordRequirements().hasSpecial"></i> Special character</div>
+      </div>
+
+      <div class="auth-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="registerForm.invalid || isLoading">
+          <i class="ti ti-user-plus"></i>
+          {{ isLoading ? 'Registering…' : 'Register' }}
+        </button>
+        <button type="button" class="btn btn-outline" (click)="registerForm.reset()">
+          <i class="ti ti-refresh"></i> Reset
+        </button>
       </div>
     </form>
   </div>

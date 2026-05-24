@@ -1,0 +1,23 @@
+<div class="shell">
+
+  <!-- Dark overlay behind sidebar on mobile — tap to close -->
+  <div
+    class="mobile-overlay"
+    [class.visible]="isMobile() && sidebarOpen()"
+    (click)="closeOverlay()">
+  </div>
+
+  <!-- Sidebar -->
+  <div class="sidebar-wrapper" [class.open]="sidebarOpen()">
+    <app-sidebar [isAdmin]="auth.isAdmin()" />
+  </div>
+
+  <!-- Main content area -->
+  <div class="shell-right">
+    <app-topbar (menuClick)="toggleSidebar()" />
+    <main class="shell-content">
+      <router-outlet />
+    </main>
+  </div>
+
+</div>

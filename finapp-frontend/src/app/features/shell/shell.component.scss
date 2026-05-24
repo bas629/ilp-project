@@ -1,0 +1,70 @@
+.shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.mobile-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 98;
+  transition: opacity 0.2s;
+
+  &.visible {
+    display: block;
+  }
+}
+
+.sidebar-wrapper {
+  flex-shrink: 0;
+  width: 220px;
+  transition: width 0.22s ease, transform 0.22s ease;
+  overflow: hidden;
+
+  app-sidebar {
+    display: block;
+    width: 220px;
+    height: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-wrapper {
+    &:not(.open) {
+      width: 0;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar-wrapper {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    z-index: 99;
+    width: 220px;
+    transform: translateX(-100%);
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.shell-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.shell-content {
+  flex: 1;
+  overflow-y: auto;
+  background: #F4F6F9;
+}

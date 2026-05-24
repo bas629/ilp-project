@@ -29,8 +29,11 @@ export class ExpenseManagerComponent implements OnInit {
   filterMonth = '';
   selectedSort = 'typeCredit';
   cashBalance = 0;
+  totalIncome = 0;
   isLoading = true;
   errorMessage: string | null = null;
+  successMsg = '';
+  errorMsg = '';
 
   // New Expense form model
   newExpense: ExpenseDto = {

@@ -25,7 +25,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/material-icons/iconfont/material-icons.css",
+              "node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css",
               "src/styles.css"
             ],
             "scripts": []

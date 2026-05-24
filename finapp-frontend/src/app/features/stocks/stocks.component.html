@@ -1,0 +1,401 @@
+<div class="page-content">
+
+  <!-- ══ INSUFFICIENT BALANCE DIALOG ══════════════════════ -->
+  <div *ngIf="insufficientBalanceMessage()"
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:250;
+              display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+    <div class="card" style="max-width:420px;width:100%;border:2px solid #ef4444;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="width:48px;height:48px;border-radius:50%;background:#fee2e2;
+                    display:flex;align-items:center;justify-content:center;color:#ef4444;font-size:24px">
+          <i class="ti ti-wallet"></i>
+        </div>
+        <div>
+          <h3 style="margin:0;color:#1e293b;font-size:16px;font-weight:700">Insufficient Wallet Balance</h3>
+          <span style="font-size:12px;color:#ef4444;font-weight:500">Transaction Declined</span>
+        </div>
+      </div>
+      
+      <p style="font-size:14px;color:#475569;line-height:1.6;margin:0 0 20px 0;background:#f8fafc;padding:12px;border-radius:8px;border-left:4px solid #ef4444">
+        {{ insufficientBalanceMessage() }}
+      </p>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="btn btn-outline" (click)="insufficientBalanceMessage.set('')">Close</button>
+        <button class="btn btn-primary" routerLink="/app/expenses" (click)="insufficientBalanceMessage.set('')"
+                style="background:linear-gradient(90deg,#ef4444,#dc2626);border:none">
+          <i class="ti ti-plus"></i> Add Income
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SELL DIALOG ══════════════════════════════════════ -->
+  <div *ngIf="sellDialog()"
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:200;
+              display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+    <div class="card" style="max-width:400px;width:100%;border:2px solid #fca5a5">
+      <div class="card-title" style="color:#dc2626">
+        📤 Sell {{ sellDialog()!.stockName }}
+        <span style="font-size:11px;color:#6B7280;font-weight:400">Max: {{ sellDialog()!.maxQty }} units</span>
+      </div>
+      <div style="background:#FEF3C7;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400E">
+        💡 Sell price is pre-filled with the <strong>live market price</strong>. You may adjust it.
+      </div>
+      <div class="form-group">
+        <label>Quantity to sell *</label>
+        <input type="number" [value]="sellDialog()!.sellQty"
+               (input)="setSellQty(+$any($event.target).value)"
+               [max]="sellDialog()!.maxQty" min="1" />
+        <span class="form-error" *ngIf="sellDialog()!.sellQty > sellDialog()!.maxQty">
+          Cannot exceed {{ sellDialog()!.maxQty }} units.
+        </span>
+      </div>
+      <div class="form-group">
+        <label>Sell price per unit (₹) *</label>
+        <input type="number" [value]="sellDialog()!.sellPrice"
+               (input)="setSellPrice(+$any($event.target).value)" min="1" />
+      </div>
+      <div *ngIf="sellDialog()!.sellQty > 0 && sellDialog()!.sellPrice > 0"
+           style="background:linear-gradient(135deg,#EAF3DE,#D1FAE5);border-radius:10px;padding:12px 14px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="color:#3B6D11;font-size:12px">Total proceeds</span>
+          <span style="font-weight:700;color:#16a34a;font-size:18px">{{ sellTotal | inr }}</span>
+        </div>
+        <div style="color:#6B7280;font-size:11px;margin-top:4px">Auto-added to Records as Stock_Sale income ✅</div>
+      </div>
+      <div *ngIf="sellDialog()!.sellQty === sellDialog()!.maxQty"
+           class="alert alert-warn" style="margin-bottom:12px">
+        ⚠️ Selling all units removes this stock from your portfolio.
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" (click)="closeSellDialog()">Cancel</button>
+        <button class="btn btn-danger btn-sm"
+                [disabled]="sellSaving() || sellDialog()!.sellQty <= 0 || sellDialog()!.sellQty > sellDialog()!.maxQty || sellDialog()!.sellPrice <= 0"
+                (click)="confirmSell()">
+          {{ sellSaving() ? 'Processing...' : 'Confirm Sell' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ALERTS ══════════════════════════════════════════ -->
+  <div *ngIf="success()" class="alert alert-success mb-14">{{ success() }}</div>
+  <div *ngIf="error()"   class="alert alert-danger mb-14">{{ error() }}</div>
+
+  <!-- ══ SUMMARY CARDS ═══════════════════════════════════ -->
+  <div class="row-3 mb-14">
+    <div class="metric-card" style="border-top:3px solid #3b82f6">
+      <div class="metric-label">Total Invested</div>
+      <div class="metric-value blue">{{ totalInvested() | inr }}</div>
+    </div>
+    <div class="metric-card" style="border-top:3px solid #8b5cf6">
+      <div class="metric-label">Units Held</div>
+      <div class="metric-value" style="color:#7c3aed">{{ totalQuantity() }}</div>
+    </div>
+    <div class="metric-card" style="border-top:3px solid #f59e0b">
+      <div class="metric-label">Avg Risk Level</div>
+      <div class="metric-value amber">{{ avgRisk() }}%</div>
+    </div>
+  </div>
+
+  <!-- ══ WIZARD STEP: IDLE ════════════════════════════════ -->
+  <div *ngIf="wizardStep() === 'idle'" class="card mb-14"
+       style="background:linear-gradient(135deg,#1e3a5f,#0f2447);border:none;color:#fff">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px">🤖 Smart Investment Advisor</div>
+        <div style="color:#93c5fd;font-size:13px">Tell us your risk appetite &amp; budget — we'll recommend the perfect stocks for you.</div>
+      </div>
+      <button class="btn btn-primary" (click)="startWizard()"
+              style="background:linear-gradient(90deg,#3b82f6,#6366f1);border:none;padding:10px 24px;font-size:14px;font-weight:600">
+        🚀 Invest Now
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ WIZARD STEP: PICK RISK ═══════════════════════════ -->
+  <div *ngIf="wizardStep() === 'pick-risk'" class="card mb-14">
+    <div class="card-title">Step 1 of 2 — Choose Your Risk Appetite</div>
+    <p style="color:#6B7280;font-size:13px;margin-bottom:20px">How comfortable are you with price fluctuations?</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
+      <button *ngFor="let opt of riskOptions"
+              (click)="selectRisk(opt.value)"
+              [style.border-color]="opt.color"
+              style="border:2px solid;border-radius:14px;padding:20px;text-align:left;cursor:pointer;
+                     background:#fff;outline:none;transition:transform .2s">
+        <div style="font-size:28px;margin-bottom:8px">{{ opt.icon }}</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px" [style.color]="opt.color">{{ opt.label }}</div>
+        <div style="font-size:12px;color:#6B7280;line-height:1.5">{{ opt.desc }}</div>
+      </button>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-outline btn-sm" (click)="cancelWizard()">✕ Cancel</button>
+    </div>
+  </div>
+
+  <!-- ══ WIZARD STEP: PICK AMOUNT ════════════════════════ -->
+  <div *ngIf="wizardStep() === 'pick-amount'" class="card mb-14">
+    <div class="card-title">
+      Step 2 of 2 — How Much to Invest?
+      <span class="badge" [ngClass]="riskBadgeClass(selectedRisk())" style="font-size:11px">{{ selectedRisk() }} RISK</span>
+    </div>
+    <p style="color:#6B7280;font-size:13px;margin-bottom:20px">We'll split it optimally between stocks, gold &amp; savings.</p>
+    <div style="max-width:380px">
+      <div class="form-group">
+        <label style="font-weight:600">Investment Amount (₹) *</label>
+        <input type="number" [(ngModel)]="investAmount" min="1000" placeholder="e.g. 10000"
+               style="font-size:18px;font-weight:600" />
+        <span style="font-size:11px;color:#9CA3AF">Minimum ₹1,000 recommended</span>
+        <span class="form-error" *ngIf="investAmount > 0 && investAmount < 1000" style="display:block;margin-top:4px">
+          ⚠️ Recommended minimum is ₹1,000.
+        </span>
+        <span class="form-error" *ngIf="investAmount <= 0 && investAmount !== null" style="display:block;margin-top:4px">
+          ❌ Please enter a valid positive amount.
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+        <button *ngFor="let a of quickAmounts" (click)="setQuickAmount(a)"
+                style="border:1px solid #e5e7eb;border-radius:20px;padding:4px 14px;
+                       font-size:12px;cursor:pointer;background:#f9fafb;outline:none">
+          ₹{{ formatQuickAmt(a) }}
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-primary" (click)="getRecommendations()" [disabled]="loadingRec()">
+          {{ loadingRec() ? '⏳ Analysing...' : '🔍 Get Recommendations' }}
+        </button>
+        <button class="btn btn-outline btn-sm" (click)="wizardStep.set('pick-risk')">← Back</button>
+        <button class="btn btn-outline btn-sm" (click)="cancelWizard()">✕ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WIZARD STEP: RECOMMENDATIONS ════════════════════ -->
+  <ng-container *ngIf="wizardStep() === 'recommendations'">
+    <ng-container *ngIf="recommendation() as rec">
+
+      <!-- Allocation banner -->
+      <div class="card mb-14"
+           style="background:linear-gradient(135deg,#0f2447,#1e3a5f);color:#fff;border:none">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <span style="font-size:22px">🧠</span>
+          <div>
+            <div style="font-weight:700;font-size:16px">AI Portfolio Recommendation</div>
+            <div style="color:#93c5fd;font-size:12px">
+              Budget: {{ rec.targetAmount | inr }} &nbsp;·&nbsp;
+              Risk: <span class="badge" [ngClass]="riskBadgeClass(rec.riskCategory)">{{ rec.riskCategory }}</span>
+            </div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto;color:#fff;border-color:#ffffff44"
+                  (click)="wizardStep.set('pick-amount')">← Change</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">📈</div>
+            <div style="font-size:11px;color:#93c5fd;margin-bottom:2px">Stocks {{ rec.stockPct }}%</div>
+            <div style="font-weight:700;color:#6ee7b7">{{ rec.stockAllocatedAmount | inr }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">🥇</div>
+            <div style="font-size:11px;color:#93c5fd;margin-bottom:2px">Gold {{ rec.goldPct }}%</div>
+            <div style="font-weight:700;color:#fbbf24">{{ rec.goldAllocatedAmount | inr }}</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:20px;margin-bottom:4px">💰</div>
+            <div style="font-size:11px;color:#93c5fd;margin-bottom:2px">Savings {{ rec.savingsPct }}%</div>
+            <div style="font-weight:700;color:#a78bfa">{{ rec.savingsAllocatedAmount | inr }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommended stock cards -->
+      <div class="card mb-14">
+        <div class="card-title">
+          ✅ Recommended Stocks
+          <span style="font-size:12px;color:#6B7280;font-weight:400">Click to invest</span>
+        </div>
+        <div *ngIf="recStocks().length === 0" style="color:#9CA3AF;font-size:13px;padding:12px 0">
+          Live stock data is loading... please wait a moment and try again.
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
+          <div *ngFor="let stock of recStocks()"
+               (click)="selectStockToInvest(stock)"
+               style="border:2px solid #e5e7eb;border-radius:14px;padding:18px;cursor:pointer;
+                      transition:all .2s;position:relative;overflow:hidden">
+            <span class="badge" [ngClass]="riskBadgeClass(stock.riskCategory)"
+                  style="position:absolute;top:12px;right:12px;font-size:10px">{{ stock.riskCategory }}</span>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#eff6ff,#dbeafe);
+                          display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#1d4ed8">
+                {{ stock.symbol.substring(0, 3) }}
+              </div>
+              <div>
+                <div style="font-weight:700;font-size:14px">{{ stock.symbol }}</div>
+                <div style="font-size:11px;color:#6B7280">{{ stock.companyName }}</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end">
+              <div>
+                <div style="font-size:19px;font-weight:800;color:#1e293b">{{ stock.currentPrice | inr }}</div>
+                <div style="font-size:11px;color:#6B7280">per share · {{ stock.sector }}</div>
+              </div>
+              <div style="text-align:right">
+                <div [style.color]="priceChange(stock) >= 0 ? '#16a34a' : '#dc2626'"
+                     style="font-size:12px;font-weight:600">
+                  {{ priceChange(stock) >= 0 ? '▲' : '▼' }} {{ priceChange(stock) | number:'1.2-2' }}%
+                </div>
+                <div style="font-size:10px;color:#16a34a">Exp. {{ stock.expectedReturn }}% return</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;padding-top:8px;border-top:1px solid #f1f5f9;
+                        text-align:center;font-size:11px;color:#3b82f6;font-weight:600">
+              Tap to invest →
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px">
+          <button class="btn btn-outline btn-sm" (click)="cancelWizard()">✕ Close</button>
+        </div>
+      </div>
+
+    </ng-container>
+  </ng-container>
+
+  <!-- ══ WIZARD STEP: CONFIRM INVEST ═════════════════════ -->
+  <ng-container *ngIf="wizardStep() === 'confirm-invest'">
+    <ng-container *ngIf="selectedStock() as stock">
+      <div class="card mb-14" style="border:2px solid #3b82f6;max-width:480px">
+        <div class="card-title" style="color:#1d4ed8">💳 Confirm Investment</div>
+        <div style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-radius:12px;padding:16px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:48px;height:48px;border-radius:12px;background:#1d4ed8;
+                        display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px">
+              {{ stock.symbol.substring(0, 3) }}
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:16px">{{ stock.companyName }}</div>
+              <div style="font-size:12px;color:#6B7280">{{ stock.symbol }} · {{ stock.riskCategory }} Risk · {{ stock.sector }}</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px">
+            <span>Live Price</span>
+            <span style="font-weight:700;color:#1d4ed8;font-size:16px">{{ stock.currentPrice | inr }}/share</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label style="font-weight:600">Number of Shares to Buy *</label>
+          <input type="number" [(ngModel)]="confirmQty" min="1" placeholder="e.g. 5" style="font-size:18px;font-weight:600" />
+          <span style="font-size:11px;color:#9CA3AF">Suggested: {{ suggestedQty }} shares based on your budget</span>
+          <span class="form-error" *ngIf="confirmQty <= 0" style="display:block;margin-top:4px">
+            ❌ Please enter a quantity of 1 or more.
+          </span>
+        </div>
+        <div style="background:linear-gradient(135deg,#EAF3DE,#D1FAE5);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#3B6D11;font-size:13px">Total Cost</span>
+            <span style="font-weight:800;color:#16a34a;font-size:22px">{{ confirmTotal | inr }}</span>
+          </div>
+          <div style="font-size:11px;color:#6B7280;margin-top:4px">
+            Deducted from wallet. A Stock_Buy record is auto-created. ✅
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" (click)="confirmInvest()"
+                  [disabled]="confirmSaving() || confirmQty <= 0"
+                  style="background:linear-gradient(90deg,#16a34a,#059669);border:none;flex:1">
+            {{ confirmSaving() ? '⏳ Investing...' : '✅ Invest ' + (confirmTotal | inr) }}
+          </button>
+          <button class="btn btn-outline btn-sm" (click)="wizardStep.set('recommendations')">← Back</button>
+          <button class="btn btn-outline btn-sm" (click)="cancelWizard()">✕</button>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- ══ PORTFOLIO HOLDINGS TABLE ════════════════════════ -->
+  <div class="card">
+    <div class="card-title">
+      📊 My Portfolio
+      <button *ngIf="wizardStep() === 'idle'" class="btn btn-primary btn-sm" (click)="startWizard()">+ Invest More</button>
+    </div>
+
+    <div *ngIf="loading()" class="empty-state">
+      <i class="ti ti-loader" aria-hidden="true"></i>
+      <p>Loading portfolio...</p>
+    </div>
+
+    <div *ngIf="!loading() && investments().length === 0" class="empty-state">
+      <div style="font-size:48px;margin-bottom:12px">📈</div>
+      <p style="font-weight:600;color:#374151;margin-bottom:6px">No investments yet</p>
+      <p style="font-size:13px;color:#9CA3AF;margin-bottom:16px">Use the Smart Advisor above to get personalised stock recommendations.</p>
+      <button class="btn btn-primary" (click)="startWizard()">🚀 Get Started</button>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loading() && investments().length > 0">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Stock</th>
+            <th style="width:60px">Qty</th>
+            <th style="width:120px">Invested</th>
+            <th style="width:130px">Live Price</th>
+            <th style="width:120px">P&amp;L</th>
+            <th style="width:80px">Risk</th>
+            <th style="width:100px">Date</th>
+            <th style="width:90px">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of investments()">
+            <td>
+              <div style="font-weight:600;font-size:13px">{{ inv.stockName }}</div>
+              <div style="font-size:11px;color:#9CA3AF">
+                {{ getLiveStock(inv.stockName)?.companyName ?? '' }}
+              </div>
+            </td>
+            <td style="font-weight:600">{{ inv.quantity }}</td>
+            <td style="color:#1d4ed8;font-weight:600">{{ inv.investedAmount | inr }}</td>
+            <td>
+              <ng-container *ngIf="getLiveStock(inv.stockName) as live; else noLive">
+                <div style="font-weight:700;font-size:13px">{{ live.currentPrice | inr }}</div>
+                <div [style.color]="priceChange(live) >= 0 ? '#16a34a' : '#dc2626'"
+                     style="font-size:11px;font-weight:600">
+                  {{ priceChange(live) >= 0 ? '▲' : '▼' }} {{ priceChange(live) | number:'1.2-2' }}%
+                </div>
+              </ng-container>
+              <ng-template #noLive><span style="color:#9CA3AF;font-size:12px">—</span></ng-template>
+            </td>
+            <td>
+              <ng-container *ngIf="getLiveStock(inv.stockName) as live; else noPL">
+                <ng-container *ngIf="(live.currentPrice * inv.quantity - inv.investedAmount) as pl">
+                  <div [style.color]="pl >= 0 ? '#16a34a' : '#dc2626'" style="font-weight:700;font-size:13px">
+                    {{ pl >= 0 ? '+' : '' }}{{ pl | inr }}
+                  </div>
+                  <div [style.color]="pl >= 0 ? '#16a34a' : '#dc2626'" style="font-size:11px">
+                    {{ pl >= 0 ? '+' : '' }}{{ (pl / inv.investedAmount * 100) | number:'1.1-1' }}%
+                  </div>
+                </ng-container>
+              </ng-container>
+              <ng-template #noPL><span style="color:#9CA3AF;font-size:12px">—</span></ng-template>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="inv.riskPercent < 3 ? 'badge-green' : inv.riskPercent < 6 ? 'badge-amber' : 'badge-red'">
+                {{ inv.riskPercent }}%
+              </span>
+            </td>
+            <td style="color:#9CA3AF;font-size:12px">{{ inv.investmentDate }}</td>
+            <td>
+              <button class="btn btn-sm"
+                      style="padding:4px 12px;font-size:11px;background:#FEF2F2;color:#dc2626;border:1px solid #fca5a5"
+                      (click)="openSellDialog(inv)">
+                📤 Sell
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

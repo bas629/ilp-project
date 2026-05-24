@@ -49,14 +49,18 @@ export class PortfolioComponent implements OnInit {
       legend: {
         position: 'bottom',
         labels: {
-          color: '#94a3b8',
-          font: { family: 'Plus Jakarta Sans', size: 12 }
+          color: '#4b5563',
+          font: { family: 'DM Sans', size: 11 }
         }
       },
       tooltip: {
-        backgroundColor: '#131a2e',
-        titleFont: { family: 'Plus Jakarta Sans' },
-        bodyFont: { family: 'Plus Jakarta Sans' }
+        backgroundColor: '#ffffff',
+        titleColor: '#111827',
+        bodyColor: '#4b5563',
+        borderColor: 'rgba(0,0,0,0.08)',
+        borderWidth: 1,
+        titleFont: { family: 'DM Sans', size: 12, weight: 'bold' },
+        bodyFont: { family: 'DM Sans', size: 12 }
       }
     },
     cutout: '70%'
@@ -68,7 +72,7 @@ export class PortfolioComponent implements OnInit {
     datasets: [
       {
         data: [0, 0, 0],
-        backgroundColor: ['#06b6d4', '#8b5cf6', '#f59e0b'],
+        backgroundColor: ['#1D9E75', '#378ADD', '#EF9F27'],
         borderWidth: 0
       }
     ]
@@ -98,7 +102,7 @@ export class PortfolioComponent implements OnInit {
           datasets: [
             {
               data: [port.cashBalance, port.stockHoldingsValue, port.goldHoldingsValue],
-              backgroundColor: ['#06b6d4', '#8b5cf6', '#f59e0b'],
+              backgroundColor: ['#1D9E75', '#378ADD', '#EF9F27'],
               borderWidth: 0
             }
           ]
@@ -156,10 +160,10 @@ export class PortfolioComponent implements OnInit {
   }
 
   getRiskBadgeClass(risk: number): string {
-    if (risk <= 30) return 'badge-low';
-    if (risk <= 60) return 'badge-med';
-    if (risk <= 85) return 'badge-high';
-    return 'badge-speculative';
+    if (risk <= 30) return 'badge-green';
+    if (risk <= 60) return 'badge-blue';
+    if (risk <= 85) return 'badge-amber';
+    return 'badge-red';
   }
 
   getRiskLabel(risk: number): string {

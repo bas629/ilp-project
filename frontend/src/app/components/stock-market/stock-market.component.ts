@@ -217,10 +217,10 @@ export class StockMarketComponent implements OnInit, OnDestroy {
   }
 
   getRiskBadgeClass(risk: number): string {
-    if (risk <= 3) return 'badge-low';
-    if (risk <= 7) return 'badge-med';
-    if (risk <= 15) return 'badge-high';
-    return 'badge-speculative';
+    if (risk <= 3) return 'badge-green';
+    if (risk <= 7) return 'badge-blue';
+    if (risk <= 15) return 'badge-amber';
+    return 'badge-red';
   }
 
   getRiskLabel(risk: number): string {

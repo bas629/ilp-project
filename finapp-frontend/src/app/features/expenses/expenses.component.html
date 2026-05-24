@@ -1,0 +1,110 @@
+<div class="page-content">
+
+  <div *ngIf="success()" class="alert alert-success mb-14">
+    <i class="ti ti-check" aria-hidden="true"></i> {{ success() }}
+  </div>
+  <div *ngIf="error()" class="alert alert-danger mb-14">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ error() }}
+  </div>
+
+  <!-- Summary metrics -->
+  <div class="row-2 mb-14">
+    <div class="metric-card">
+      <div class="metric-label">Total income (all time)</div>
+      <div class="metric-value green">{{ totalIncome() | inr }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Total expenses (all time)</div>
+      <div class="metric-value red">{{ totalExpenses() | inr }}</div>
+    </div>
+  </div>
+
+  <div class="row-2">
+
+    <!-- Add entry form -->
+    <div class="card">
+      <div class="card-title">Add financial entry</div>
+
+      <!-- Income / Expense toggle -->
+      <div class="tab-type-toggle mb-14">
+        <button [class.active]="isIncome()"  (click)="setType(true)">Income</button>
+        <button [class.active]="!isIncome()" (click)="setType(false)">Expense</button>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+          <label>{{ categoryLabel }} *</label>
+          <select formControlName="category">
+            <option value="">Select {{ categoryLabel }}</option>
+            <option *ngFor="let opt of categoryOptions" [value]="opt">{{ opt }}</option>
+          </select>
+          <span class="form-error" *ngIf="form.get('category')?.invalid && form.get('category')?.touched">
+            Please select a {{ categoryLabel | lowercase }}.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Amount (₹) *</label>
+          <input type="number" formControlName="amount" placeholder="e.g. 15000" min="1" />
+          <span class="form-error" *ngIf="form.get('amount')?.invalid && form.get('amount')?.touched">
+            Enter a valid positive amount.
+          </span>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" formControlName="date" />
+            <span class="form-error" *ngIf="form.get('date')?.invalid && form.get('date')?.touched">
+              Date is required.
+            </span>
+          </div>
+          <div class="form-group">
+            <label>Account *</label>
+            <select formControlName="account">
+              <option value="Savings">Savings</option>
+              <option value="Current">Current</option>
+              <option value="Cash">Cash</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea formControlName="notes" placeholder="Any notes..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button type="submit" class="btn btn-primary" style="flex:1" [disabled]="saving()">
+            <i class="ti ti-device-floppy" aria-hidden="true"></i>
+            {{ saving() ? 'Saving...' : 'Save entry' }}
+          </button>
+          <button type="button" class="btn btn-outline" (click)="form.reset({account:'Savings'})">
+            Clear
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Monthly chart (live from DB) -->
+    <div class="card">
+      <div class="card-title">Monthly expenses</div>
+      <div class="bar-chart">
+        <div class="bar-col" *ngFor="let m of monthlyChart()">
+          <div class="bar-col-fill"
+               [style.height.%]="m.heightPct || 2"
+               [style.background]="m.heightPct === 100 ? '#378ADD' : '#B5D4F4'">
+          </div>
+          <span class="bar-col-label">{{ m.label }}</span>
+        </div>
+      </div>
+      <div *ngIf="totalExpenses() === 0" class="empty-state" style="padding:16px 0">
+        <i class="ti ti-chart-bar" aria-hidden="true"></i>
+        <p>Add expenses to see your monthly chart</p>
+      </div>
+    </div>
+
+  </div>
+</div>

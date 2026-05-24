@@ -1,0 +1,12 @@
+.profile-card {
+  display: flex; flex-direction: column; align-items: center;
+  text-align: center; gap: 8px;
+}
+.avatar-lg {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: #E6F1FB; color: #0C447C;
+  font-size: 24px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.profile-id { font-size: 11px; color: #9CA3AF; margin-top: 8px; }
+.mb-14 { margin-bottom: 14px; }

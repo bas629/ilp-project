@@ -1,0 +1,28 @@
+<div class="ack-page">
+  <div class="ack-card card">
+    <div class="ack-icon">
+      <i class="ti ti-circle-check"></i>
+    </div>
+    <h2>Registration Successful!</h2>
+    <p>Your account has been created. Welcome to FinApp.</p>
+
+    <div class="ack-details">
+      <div class="ack-row">
+        <span class="ack-label">User ID</span>
+        <span class="ack-value badge badge-blue">{{ userId }}</span>
+      </div>
+      <div class="ack-row">
+        <span class="ack-label">Name</span>
+        <span class="ack-value">{{ name }}</span>
+      </div>
+      <div class="ack-row">
+        <span class="ack-label">Email</span>
+        <span class="ack-value">{{ email }}</span>
+      </div>
+    </div>
+
+    <a routerLink="/login" class="btn btn-primary w-full">
+      <i class="ti ti-login"></i> Login now
+    </a>
+  </div>
+</div>

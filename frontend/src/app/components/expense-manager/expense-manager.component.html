@@ -1,247 +1,117 @@
-<div class="expenses-wrapper animate-fade-in">
-  <!-- HEADER PANEL -->
-  <header class="expenses-header">
-    <div>
-      <h1 class="page-title">Expense Ledger</h1>
-      <p class="page-subtitle">Log transaction credits or debits to manage your available liquid cash.</p>
+<div class="page-content">
+
+  <!-- Metrics -->
+  <div class="row-2 mb-14">
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-arrow-down-circle"></i> Total Income (all time)</div>
+      <div class="metric-value green">{{ totalIncome | currency:'INR':'symbol':'1.0-0' }}</div>
     </div>
-    
-    <div class="glass-panel balance-display-card">
-      <span class="bal-label">AVAILABLE CASH WALLET</span>
-      <h2 class="bal-val">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</h2>
+    <div class="metric-card">
+      <div class="metric-label"><i class="ti ti-wallet"></i> Available Cash Wallet</div>
+      <div class="metric-value blue">{{ cashBalance | currency:'INR':'symbol':'1.0-0' }}</div>
     </div>
-  </header>
+  </div>
 
-  <!-- MAIN GRID -->
-  <div class="expenses-grid-layout">
-    
-    <!-- LEFT COLUMN: ADD TRANSACTION & DOUGHNUT CHART -->
-    <div class="left-section">
-      <!-- Logging card -->
-      <section class="glass-panel form-panel">
-        <h3 class="section-title">Record Transaction</h3>
-        <form (ngSubmit)="onSubmit()" #expForm="ngForm" class="expense-entry-form">
-          <div class="input-row">
-            <div class="input-group flex-2">
-              <label class="input-label" for="title">Description Title</label>
-              <input 
-                type="text" 
-                id="title" 
-                name="title" 
-                [(ngModel)]="newExpense.title" 
-                class="form-control" 
-                placeholder="e.g. Grocery, Monthly Salary" 
-                required 
-                #titleInput="ngModel"
-              />
-            </div>
-            
-            <div class="input-group flex-1">
-              <label class="input-label" for="amount">Amount (₹)</label>
-              <input 
-                type="number" 
-                id="amount" 
-                name="amount" 
-                [(ngModel)]="newExpense.amount" 
-                class="form-control" 
-                placeholder="0.00" 
-                required 
-                min="0.01" 
-                #amountInput="ngModel"
-              />
-            </div>
+  <div *ngIf="successMsg" class="alert alert-success mb-14"><i class="ti ti-check"></i> {{ successMsg }}</div>
+  <div *ngIf="errorMsg"   class="alert alert-danger mb-14"><i class="ti ti-alert-circle"></i> {{ errorMsg }}</div>
+
+  <div class="row-2">
+
+    <!-- Add Transaction Form -->
+    <div class="card">
+      <div class="card-title">Record Transaction</div>
+
+      <div class="tab-type-toggle">
+        <button [class.active]="newExpense.transactionType === 'CREDIT'" (click)="newExpense.transactionType = 'CREDIT'">Income</button>
+        <button [class.active]="newExpense.transactionType === 'DEBIT'"  (click)="newExpense.transactionType = 'DEBIT'">Expense</button>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #expForm="ngForm">
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="title" [(ngModel)]="newExpense.title" placeholder="e.g. Grocery, Monthly Salary" required>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" name="amount" [(ngModel)]="newExpense.amount" placeholder="0" required min="1">
           </div>
-
-          <div class="input-row">
-            <div class="input-group flex-1">
-              <label class="input-label" for="transactionType">Transaction Type</label>
-              <select 
-                id="transactionType" 
-                name="transactionType" 
-                [(ngModel)]="newExpense.transactionType" 
-                class="form-control"
-              >
-                <option value="DEBIT">Debit (Outflow)</option>
-                <option value="CREDIT">Credit (Inflow)</option>
-              </select>
-            </div>
-
-            <div class="input-group flex-1">
-              <label class="input-label" for="category">Category</label>
-              <select 
-                id="category" 
-                name="category" 
-                [(ngModel)]="newExpense.category" 
-                class="form-control"
-              >
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
-            </div>
-
-            <div class="input-group flex-1">
-              <label class="input-label" for="expenseDate">Date</label>
-              <input 
-                type="date" 
-                id="expenseDate" 
-                name="expenseDate" 
-                [(ngModel)]="newExpense.expenseDate" 
-                class="form-control" 
-                required
-              />
-            </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" name="expenseDate" [(ngModel)]="newExpense.expenseDate" required>
           </div>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select name="category" [(ngModel)]="newExpense.category">
+            <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-full" [disabled]="expForm.invalid || isLoading">
+          <i class="ti ti-device-floppy"></i>
+          {{ isLoading ? 'Saving…' : 'Save Transaction' }}
+        </button>
+      </form>
+    </div>
 
-          <button 
-            type="submit" 
-            class="btn btn-primary log-btn" 
-            [disabled]="expForm.invalid || isLoading || newExpense.amount <= 0"
-          >
-            <span class="material-icons-outlined">add_card</span>
-            <span>Record Transaction</span>
+    <!-- Ledger Table -->
+    <div class="card">
+      <div class="card-title">
+        Transaction Ledger
+        <div class="flex-row" style="gap:6px">
+          <input type="month" [(ngModel)]="filterMonth" (ngModelChange)="applyMonthFilter()"
+                 style="font-size:12px;padding:4px 8px;border:1px solid var(--border-strong);border-radius:6px;outline:none">
+          <button class="btn-icon" *ngIf="filterMonth" (click)="filterMonth='';applyMonthFilter()" title="Clear filter">
+            <i class="ti ti-x"></i>
           </button>
-        </form>
-      </section>
-
-      <!-- Category chart -->
-      <section class="glass-panel chart-panel">
-        <h3 class="section-title">Expense Distribution</h3>
-        <p class="section-subtitle">Visual breakdown of your outgoing debits.</p>
-        
-        <div class="chart-content">
-          <div 
-            class="chart-and-legend-row" 
-            *ngIf="doughnutChartLabels.length > 0; else noChartData"
-          >
-            <div class="chart-container">
-              <canvas 
-                baseChart 
-                [data]="doughnutChartData" 
-                [options]="doughnutChartOptions" 
-                [type]="doughnutChartType"
-              ></canvas>
-            </div>
-
-            <!-- Dynamic category shares text display -->
-            <div class="category-breakdown-list">
-              <div class="breakdown-item" *ngFor="let share of categoryShares">
-                <div class="category-color-dot-name">
-                  <span class="color-dot" [style.background-color]="share.color"></span>
-                  <span class="category-name">{{ share.name }}</span>
-                </div>
-                <div class="category-values">
-                  <strong class="category-amount">{{ share.amount | currency:'INR':'symbol':'1.2-2' }}</strong>
-                  <span class="category-percentage">({{ share.percentage | number:'1.1-1' }}%)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <ng-template #noChartData>
-            <div class="no-data-msg">
-              <span class="material-icons-outlined no-data-icon">donut_large</span>
-              <p>No expense data logged to analyze. Complete a Debit transaction to view the category graph.</p>
-            </div>
-          </ng-template>
+          <select [(ngModel)]="selectedSort" (change)="sortExpenses()"
+                  style="font-size:12px;padding:4px 8px;border:1px solid var(--border-strong);border-radius:6px;outline:none">
+            <option value="typeCredit">Credit First</option>
+            <option value="typeDebit">Debit First</option>
+          </select>
         </div>
-      </section>
-    </div>
+      </div>
 
-    <!-- RIGHT COLUMN: TRANSACTION LEDGER -->
-    <div class="right-section">
-      <section class="glass-panel ledger-panel">
-        <h3 class="section-title">Transaction Ledger</h3>
-        <p class="section-subtitle">Real-time ledger history of your wallet.</p>
-        
-        <!-- Month Filter & Sorting Selector -->
-        <div class="ledger-filter-row">
-          <div class="filter-group-row">
-            <div class="input-group flex-1">
-              <label class="input-label" for="ledgerMonthFilter">Search by Month</label>
-              <div class="filter-input-with-clear">
-                <input 
-                  type="month" 
-                  id="ledgerMonthFilter" 
-                  [(ngModel)]="filterMonth" 
-                  (ngModelChange)="applyMonthFilter()" 
-                  class="form-control filter-month-input" 
-                />
-                <button 
-                  type="button" 
-                  class="btn btn-secondary btn-clear-filter" 
-                  *ngIf="filterMonth" 
-                  (click)="filterMonth = ''; applyMonthFilter()"
-                  title="Clear Month Filter"
-                >
-                  <span class="material-icons">clear</span>
+      <div class="table-wrap">
+        <table class="data-table" *ngIf="expenses.length > 0; else emptyLedger">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th style="text-align:right">Amount</th>
+              <th class="actions-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of expenses">
+              <td>
+                <span class="badge" [class.badge-income]="item.transactionType==='CREDIT'" [class.badge-expense]="item.transactionType==='DEBIT'">
+                  {{ item.transactionType === 'CREDIT' ? 'IN' : 'OUT' }}
+                </span>
+                &nbsp;{{ item.title }}
+              </td>
+              <td><span class="badge badge-blue">{{ item.category }}</span></td>
+              <td>{{ item.expenseDate | date:'dd MMM yy' }}</td>
+              <td style="text-align:right;font-weight:600"
+                  [style.color]="item.transactionType==='CREDIT' ? 'var(--green-dark)' : 'var(--red-dark)'">
+                {{ item.transactionType === 'CREDIT' ? '+' : '-' }}{{ item.amount | currency:'INR':'symbol':'1.0-0' }}
+              </td>
+              <td class="actions-col">
+                <button class="btn-icon danger" (click)="onDelete(item.expenseId)" [disabled]="isLoading">
+                  <i class="ti ti-trash"></i>
                 </button>
-              </div>
-            </div>
-
-            <div class="input-group flex-1">
-              <label class="input-label" for="ledgerSort">Sort By</label>
-              <select 
-                id="ledgerSort" 
-                [(ngModel)]="selectedSort" 
-                (change)="sortExpenses()" 
-                class="form-control ledger-sort-select"
-              >
-                <option value="typeCredit">Credit First</option>
-                <option value="typeDebit">Debit First</option>
-              </select>
-            </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #emptyLedger>
+          <div class="empty-state">
+            <i class="ti ti-receipt"></i>
+            <p>No transactions yet. Record one above.</p>
           </div>
-        </div>
-        
-        <div class="ledger-list-wrapper">
-          <div class="ledger-list" *ngIf="expenses.length > 0; else emptyLedger">
-            <div 
-              class="ledger-row" 
-              *ngFor="let item of expenses"
-            >
-              <div 
-                class="indicator-bar" 
-                [ngClass]="item.transactionType === 'CREDIT' ? 'bg-credit' : 'bg-debit'"
-              ></div>
-              
-              <div class="row-main">
-                <div class="row-details">
-                  <span class="row-title">{{ item.title }}</span>
-                  <div class="row-meta">
-                    <span class="badge badge-cat">{{ item.category }}</span>
-                    <span class="row-date">{{ item.expenseDate | date:'MMM d, y' }}</span>
-                  </div>
-                </div>
-
-                <div class="row-action-area">
-                  <span 
-                    class="row-amount" 
-                    [ngClass]="item.transactionType === 'CREDIT' ? 'text-credit' : 'text-debit'"
-                  >
-                    {{ item.transactionType === 'CREDIT' ? '+' : '-' }}{{ item.amount | currency:'INR':'symbol':'1.2-2' }}
-                  </span>
-                  
-                  <button 
-                    class="btn-delete" 
-                    (click)="onDelete(item.expenseId)" 
-                    title="Delete record"
-                    [disabled]="isLoading"
-                  >
-                    <span class="material-icons-outlined">delete_outline</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <ng-template #emptyLedger>
-            <div class="empty-state">
-              <span class="material-icons-outlined empty-icon">receipt_long</span>
-              <h4>Ledger is Empty</h4>
-              <p>Log a wallet credit/debit transaction above to start tracking details here.</p>
-            </div>
-          </ng-template>
-        </div>
-      </section>
+        </ng-template>
+      </div>
     </div>
 
   </div>

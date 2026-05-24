@@ -1,0 +1,167 @@
+<div class="page-content">
+
+  <!-- Confirm delete dialog -->
+  <div *ngIf="confirmDeleteId() != null"
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50;display:flex;align-items:center;justify-content:center">
+    <div class="card" style="max-width:340px;width:100%;margin:16px">
+      <div class="card-title">Delete goal?</div>
+      <p style="font-size:13px;color:#6B7280;margin-bottom:16px">
+        This will permanently delete this goal and cannot be undone.
+      </p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline btn-sm" (click)="cancelDelete()">Cancel</button>
+        <button class="btn btn-danger btn-sm"  (click)="confirmDelete()">Yes, delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update progress dialog -->
+  <div *ngIf="updateGoalId() != null"
+       style="position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:50;display:flex;align-items:center;justify-content:center">
+    <div class="card" style="max-width:320px;width:100%;margin:16px">
+      <div class="card-title">Update progress</div>
+      <div class="form-group">
+        <label>Add amount (₹)</label>
+        <input type="number"
+               [value]="updateAmount()"
+               (input)="updateAmount.set(+$any($event.target).value)"
+               placeholder="e.g. 10000"
+               min="1" />
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-outline btn-sm" (click)="cancelUpdate()">Cancel</button>
+        <button class="btn btn-primary btn-sm" (click)="submitProgress()"
+                [disabled]="updateAmount() <= 0">
+          Save progress
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="success()" class="alert alert-success mb-14">
+    <i class="ti ti-check" aria-hidden="true"></i> {{ success() }}
+  </div>
+  <div *ngIf="error()" class="alert alert-danger mb-14">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ error() }}
+  </div>
+
+  <!-- Header -->
+  <div class="flex-between mb-14">
+    <h2 style="font-size:15px;font-weight:500">Financial goals</h2>
+    <button class="btn btn-primary btn-sm" (click)="toggleAddForm()">
+      <i class="ti ti-plus" aria-hidden="true"></i>
+      {{ showAddForm() ? 'Cancel' : 'Add goal' }}
+    </button>
+  </div>
+
+  <!-- Add goal form -->
+  <div class="card mb-14" *ngIf="showAddForm()">
+    <div class="card-title">New goal</div>
+    <form [formGroup]="addForm" (ngSubmit)="onAddGoal()">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Goal name *</label>
+          <input type="text" formControlName="name" placeholder="e.g. Retirement Fund or Dream Home" />
+          <span class="form-error"
+                *ngIf="addForm.get('name')?.invalid && addForm.get('name')?.touched">
+            Name is required (min 2 chars).
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Target amount (₹) *</label>
+          <input type="number" formControlName="targetAmount" placeholder="e.g. 500000" min="1" />
+          <span class="form-error"
+                *ngIf="addForm.get('targetAmount')?.invalid && addForm.get('targetAmount')?.touched">
+            Enter a valid amount.
+          </span>
+        </div>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Target date *</label>
+          <input type="date" formControlName="targetDate" />
+          <span class="form-error"
+                *ngIf="addForm.get('targetDate')?.invalid && addForm.get('targetDate')?.touched">
+            Date is required.
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Icon</label>
+          <select formControlName="icon">
+            <option value="ti-target">Goal</option>
+            <option value="ti-home">Home</option>
+            <option value="ti-car">Vehicle</option>
+            <option value="ti-plane">Travel</option>
+            <option value="ti-shield">Emergency fund</option>
+            <option value="ti-school">Education</option>
+            <option value="ti-heart">Health</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Creating...' : 'Create goal' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="empty-state">
+    <i class="ti ti-loader" aria-hidden="true"></i>
+    <p>Loading goals...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading() && goals().length === 0" class="empty-state">
+    <i class="ti ti-target" aria-hidden="true" style="font-size:40px;opacity:0.3;margin-bottom:12px"></i>
+    <p style="font-size:14px;font-weight:500;margin-bottom:6px">No goals yet</p>
+    <p style="font-size:13px">Create your first financial goal to start tracking progress.</p>
+  </div>
+
+  <!-- Goals list -->
+  <div class="card" *ngIf="!loading() && goals().length > 0">
+    <div class="goal-item" *ngFor="let g of goals()">
+
+      <div class="goal-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          <i class="ti {{ g.icon || 'ti-target' }}" aria-hidden="true"
+             style="font-size:15px;color:#6B7280"></i>
+          <span class="goal-name">{{ g.name }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge" [ngClass]="statusBadgeClass(g)">{{ g.status }}</span>
+          <button class="btn-icon danger" (click)="askDelete(g.goalId)" aria-label="Delete goal">
+            <i class="ti ti-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="goal-amounts">
+        Saved {{ g.savedAmount | inr }} of {{ g.targetAmount | inr }}
+        · Target: {{ g.targetDate }}
+      </div>
+
+      <div class="progress-wrap" style="margin:6px 0">
+        <div class="progress-bg">
+          <div class="progress-fill"
+               [ngClass]="progressBarClass(g)"
+               [style.width.%]="progressPct(g)">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span style="font-size:11px;color:#6B7280">
+          {{ progressPct(g) }}% complete
+          · {{ remaining(g) | inr }} remaining
+        </span>
+        <button class="btn btn-outline btn-sm"
+                *ngIf="g.status !== 'Completed'"
+                (click)="openUpdateProgress(g.goalId!)">
+          Update progress
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

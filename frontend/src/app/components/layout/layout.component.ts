@@ -1,15 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { WebsocketService } from '../../core/websocket.service';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 
-interface NavItem {
-  path: string;
-  label: string;
-  icon: string;
-}
+interface NavItem { path: string; label: string; icon: string; }
 
 @Component({
   selector: 'app-layout',
@@ -19,99 +15,97 @@ interface NavItem {
   styleUrls: ['./layout.component.css']
 })
 export class LayoutComponent implements OnInit, OnDestroy {
-  isSidebarCollapsed = false;
+  sidebarOpen = true;
+  isMobile = false;
   currentUser: any = null;
-  
-  // Ticker Data
+  pageTitle = 'Dashboard';
+
   stocksList: any[] = [];
   goldData: any = null;
   latestEvent: any = null;
 
-  private subscriptions: Subscription = new Subscription();
+  private subs = new Subscription();
 
-  navItems: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { path: '/expenses', label: 'Expense Manager', icon: 'account_balance_wallet' },
-    { path: '/stocks', label: 'Stock Exchange', icon: 'trending_up' },
-    { path: '/gold', label: 'Digital Gold', icon: 'stars' },
-    { path: '/goals', label: 'Savings Goals', icon: 'track_changes' },
-    { path: '/portfolio', label: 'Portfolio & Risk', icon: 'pie_chart' },
-    { path: '/change-password', label: 'Change Password', icon: 'lock' }
+  overviewLinks: NavItem[] = [
+    { path: '/dashboard', label: 'Dashboard',       icon: 'ti-dashboard' },
+    { path: '/portfolio', label: 'Portfolio & Risk', icon: 'ti-briefcase' },
+  ];
+  financeLinks: NavItem[] = [
+    { path: '/expenses', label: 'Expense Manager', icon: 'ti-wallet' },
+    { path: '/goals',    label: 'Savings Goals',   icon: 'ti-target' },
+  ];
+  investLinks: NavItem[] = [
+    { path: '/stocks', label: 'Stock Exchange', icon: 'ti-trending-up' },
+    { path: '/gold',   label: 'Digital Gold',   icon: 'ti-crown' },
+  ];
+  accountLinks: NavItem[] = [
+    { path: '/change-password', label: 'Change Password', icon: 'ti-lock' },
   ];
 
+  private readonly pageTitleMap: Record<string, string> = {
+    '/dashboard':       'Dashboard',
+    '/expenses':        'Expense Manager',
+    '/stocks':          'Stock Exchange',
+    '/gold':            'Digital Gold',
+    '/goals':           'Savings Goals',
+    '/portfolio':       'Portfolio & Risk',
+    '/change-password': 'Change Password',
+  };
+
+  get initials(): string {
+    const name: string = this.currentUser?.name ?? '';
+    return name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
+  }
+
   constructor(
-    private authService: AuthService,
-    private wsService: WebsocketService,
+    private auth: AuthService,
+    private ws: WebsocketService,
     private router: Router
   ) {
-    this.currentUser = this.authService.currentUserValue;
+    this.currentUser = this.auth.currentUserValue;
   }
 
-  ngOnInit() {
-    // Listen to live stock market updates
-    this.subscriptions.add(
-      this.wsService.stocks$.subscribe(stocks => {
-        if (Array.isArray(stocks)) {
-          // Add change class to trigger flash animations
-          this.stocksList = stocks.map(newStock => {
-            const oldStock = this.stocksList.find(s => s.stockId === newStock.stockId);
-            let changeClass = '';
-            if (oldStock) {
-              if (newStock.currentPrice > oldStock.currentPrice) {
-                changeClass = 'price-up';
-              } else if (newStock.currentPrice < oldStock.currentPrice) {
-                changeClass = 'price-down';
-              }
-            }
-            return { ...newStock, changeClass };
-          });
-        }
+  ngOnInit(): void {
+    this.checkViewport();
+    // Track page title
+    this.subs.add(
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe((e: any) => {
+        this.pageTitle = this.pageTitleMap[e.urlAfterRedirects] ?? 'FinWell';
       })
     );
-
-    // Listen to live gold price updates
-    this.subscriptions.add(
-      this.wsService.gold$.subscribe(gold => {
-        if (gold) {
-          let changeClass = '';
-          if (this.goldData) {
-            if (gold.currentPrice > this.goldData.currentPrice) {
-              changeClass = 'price-up';
-            } else if (gold.currentPrice < this.goldData.currentPrice) {
-              changeClass = 'price-down';
-            }
-          }
-          this.goldData = { ...gold, changeClass };
-        }
-      })
-    );
-
-    // Listen to news events
-    this.subscriptions.add(
-      this.wsService.event$.subscribe(event => {
-        if (event) {
-          this.latestEvent = event;
-          // Auto clear event alert after 10 seconds
-          setTimeout(() => {
-            if (this.latestEvent === event) {
-              this.latestEvent = null;
-            }
-          }, 10000);
-        }
-      })
-    );
+    // Stocks feed
+    this.subs.add(this.ws.stocks$.subscribe(stocks => {
+      if (Array.isArray(stocks)) this.stocksList = stocks;
+    }));
+    // Gold feed
+    this.subs.add(this.ws.gold$.subscribe(gold => {
+      if (gold) this.goldData = gold;
+    }));
+    // Event feed
+    this.subs.add(this.ws.event$.subscribe(event => {
+      if (event) {
+        this.latestEvent = event;
+        setTimeout(() => { if (this.latestEvent === event) this.latestEvent = null; }, 10000);
+      }
+    }));
   }
 
-  toggleSidebar() {
-    this.isSidebarCollapsed = !this.isSidebarCollapsed;
+  @HostListener('window:resize')
+  onResize(): void { this.checkViewport(); }
+
+  private checkViewport(): void {
+    this.isMobile = window.innerWidth <= 768;
+    if (this.isMobile) this.sidebarOpen = false;
+    else this.sidebarOpen = true;
   }
 
-  logout() {
-    this.authService.logout();
+  toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
+  onNavClick(): void { if (this.isMobile) this.sidebarOpen = false; }
+
+  logout(): void {
+    this.auth.logout();
     this.router.navigate(['/login']);
   }
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
+  ngOnDestroy(): void { this.subs.unsubscribe(); }
 }

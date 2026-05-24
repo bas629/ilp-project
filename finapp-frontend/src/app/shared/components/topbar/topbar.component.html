@@ -1,0 +1,16 @@
+<header class="topbar">
+  <button class="btn-icon menu-btn" (click)="menuClick.emit()" aria-label="Toggle sidebar">
+    <i class="ti ti-menu-2" aria-hidden="true"></i>
+  </button>
+
+  <span class="page-title">{{ (pageTitle$ | async) ?? 'Dashboard' }}</span>
+
+  <div class="topbar-right">
+    <button class="btn-icon" aria-label="Notifications">
+      <i class="ti ti-bell" aria-hidden="true"></i>
+    </button>
+    <div class="topbar-avatar" (click)="logout()" title="Click to logout">
+      {{ initials }}
+    </div>
+  </div>
+</header>

@@ -46,19 +46,23 @@ export class GoldInvestmentComponent implements OnInit, OnDestroy {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#131a2e',
-        titleFont: { family: 'Plus Jakarta Sans' },
-        bodyFont: { family: 'Plus Jakarta Sans' }
+        backgroundColor: '#ffffff',
+        titleColor: '#111827',
+        bodyColor: '#4b5563',
+        borderColor: 'rgba(0,0,0,0.08)',
+        borderWidth: 1,
+        titleFont: { family: 'DM Sans', size: 12, weight: 'bold' },
+        bodyFont: { family: 'DM Sans', size: 12 }
       }
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b' }
+        ticks: { color: '#9CA3AF', font: { family: 'DM Sans', size: 10 } }
       },
       y: {
-        grid: { color: 'rgba(255, 255, 255, 0.03)' },
-        ticks: { color: '#64748b' }
+        grid: { color: 'rgba(0, 0, 0, 0.03)' },
+        ticks: { color: '#9CA3AF', font: { family: 'DM Sans', size: 10 } }
       }
     }
   };
@@ -69,12 +73,12 @@ export class GoldInvestmentComponent implements OnInit, OnDestroy {
     datasets: [
       {
         data: this.goldPriceHistory,
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.05)',
+        borderColor: '#EF9F27',
+        backgroundColor: 'rgba(239, 159, 39, 0.05)',
         fill: true,
         tension: 0.4,
         borderWidth: 2,
-        pointBackgroundColor: '#f59e0b',
+        pointBackgroundColor: '#EF9F27',
         pointHoverRadius: 6
       }
     ]
@@ -230,12 +234,12 @@ export class GoldInvestmentComponent implements OnInit, OnDestroy {
       datasets: [
         {
           data: [...this.goldPriceHistory],
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.05)',
+          borderColor: '#EF9F27',
+          backgroundColor: 'rgba(239, 159, 39, 0.05)',
           fill: true,
           tension: 0.4,
           borderWidth: 2,
-          pointBackgroundColor: '#f59e0b',
+          pointBackgroundColor: '#EF9F27',
           pointHoverRadius: 6
         }
       ]

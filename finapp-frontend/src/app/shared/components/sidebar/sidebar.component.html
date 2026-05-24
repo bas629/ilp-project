@@ -1,0 +1,80 @@
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon"><i class="ti ti-chart-pie" aria-hidden="true"></i></div>
+    <span class="logo-text">FinApp</span>
+  </div>
+
+  <nav class="sidebar-nav">
+
+    <div class="nav-section">
+      <span class="section-label">Overview</span>
+      <a *ngFor="let link of overviewLinks"
+         class="nav-link"
+         [routerLink]="link.route"
+         routerLinkActive="active"
+         (click)="onNavClick()">
+        <i class="ti {{link.icon}}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="section-label">Finance</span>
+      <a *ngFor="let link of financeLinks"
+         class="nav-link"
+         [routerLink]="link.route"
+         routerLinkActive="active"
+         (click)="onNavClick()">
+        <i class="ti {{link.icon}}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="section-label">Investments</span>
+      <a *ngFor="let link of investLinks"
+         class="nav-link"
+         [routerLink]="link.route"
+         routerLinkActive="active"
+         (click)="onNavClick()">
+        <i class="ti {{link.icon}}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <span class="section-label">Health</span>
+      <a *ngFor="let link of healthLinks"
+         class="nav-link"
+         [routerLink]="link.route"
+         routerLinkActive="active"
+         (click)="onNavClick()">
+        <i class="ti {{link.icon}}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    </div>
+
+    <div class="nav-section" *ngIf="isAdmin">
+      <span class="section-label" style="color:#D85A30">Admin</span>
+      <a *ngFor="let link of adminLinks"
+         class="nav-link"
+         [routerLink]="link.route"
+         routerLinkActive="active"
+         (click)="onNavClick()">
+        <i class="ti {{link.icon}}" aria-hidden="true"></i>
+        <span>{{ link.label }}</span>
+      </a>
+    </div>
+
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="nav-link" routerLink="/app/profile" routerLinkActive="active" (click)="onNavClick()">
+      <div class="avatar-sm">{{ userInitials }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ userName }}</span>
+        <span class="user-role" [class.admin-role]="isAdmin">{{ isAdmin ? 'Admin' : 'User' }}</span>
+      </div>
+    </a>
+  </div>
+</aside>

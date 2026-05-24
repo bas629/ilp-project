@@ -51,23 +51,25 @@ export class SummaryComponent implements OnInit {
     });
   }
 
-  getWellnessScoreColor(score: number): string {
-    if (score >= 80) return 'var(--accent-emerald)';
-    if (score >= 50) return 'var(--accent-amber)';
-    return 'var(--accent-rose)';
+  getWellnessColor(score?: number): string {
+    if (!score) return '#9CA3AF';
+    if (score >= 80) return '#3B6D11';
+    if (score >= 60) return '#185FA5';
+    if (score >= 40) return '#854F0B';
+    return '#A32D2D';
   }
 
-  getRiskBadgeClass(risk: number): string {
-    if (risk <= 30) return 'badge-low';
-    if (risk <= 60) return 'badge-med';
-    if (risk <= 85) return 'badge-high';
-    return 'badge-speculative';
+  getRiskColor(risk?: number): string {
+    if (!risk) return '#9CA3AF';
+    if (risk < 10) return '#3B6D11';
+    if (risk < 25) return '#854F0B';
+    return '#A32D2D';
   }
 
   getRiskLabel(risk: number): string {
-    if (risk <= 30) return 'Conservative';
-    if (risk <= 60) return 'Moderate';
-    if (risk <= 85) return 'Aggressive';
-    return 'Highly Speculative';
+    if (risk < 10) return 'Low Risk';
+    if (risk < 25) return 'Moderate Risk';
+    if (risk < 40) return 'High Risk';
+    return 'Very High Risk';
   }
 }

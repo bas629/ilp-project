@@ -1,103 +1,60 @@
 <div class="landing-container">
-  <!-- Nav Bar -->
-  <header class="navbar glass-panel">
-    <div class="logo">
-      <span class="material-icons logo-icon">query_stats</span>
-      <span class="logo-text">FINWELL</span>
+  <!-- Top header / logo -->
+  <header class="landing-header animate-fade-in">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-chart-pie"></i></div>
+      <span class="brand-name">FinWell</span>
     </div>
-    <nav class="nav-links">
-      <a routerLink="/login" class="btn btn-secondary btn-sm">Log In</a>
+    <div class="nav-links">
+      <a routerLink="/login" class="btn btn-outline btn-sm">Sign In</a>
       <a routerLink="/register" class="btn btn-primary btn-sm">Get Started</a>
-    </nav>
+    </div>
   </header>
 
-  <!-- Hero Section -->
+  <!-- Hero section -->
   <section class="hero-section">
-    <div class="hero-content">
-      <div class="badge badge-speculative mb-4">
-        <span class="material-icons-outlined">offline_bolt</span>
-        Smart Finance Simulator
-      </div>
-      <h1 class="hero-title">
-        Master Your Money <br/>
-        <span class="gradient-text">Without the Risk</span>
-      </h1>
-      <p class="hero-subtitle">
-        Track expenses, build savings goals, and trade in simulated stock and digital gold markets. Get real-time updates and an AI-driven financial wellness score.
-      </p>
-      <div class="hero-actions">
-        <a routerLink="/register" class="btn btn-primary btn-lg">
-          Start Free Simulation
-          <span class="material-icons">arrow_forward</span>
-        </a>
-        <a routerLink="/login" class="btn btn-secondary btn-lg">Access Account</a>
-      </div>
-    </div>
-
-    <!-- Hero Visual / Dashboard Preview -->
-    <div class="hero-visual">
-      <div class="mockup-card glass-panel">
-        <div class="mockup-header">
-          <div class="window-dots">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-          </div>
-          <div class="mockup-title">FinWell Dashboard</div>
-        </div>
-        <div class="mockup-body">
-          <div class="mockup-widget-grid">
-            <div class="mockup-widget">
-              <span class="widget-label">Net Worth</span>
-              <span class="widget-value">₹54,230.15</span>
-              <span class="widget-trend positive">+8.46%</span>
-            </div>
-            <div class="mockup-widget">
-              <span class="widget-label">Wellness Score</span>
-              <span class="widget-value text-accent">88 / 100</span>
-              <span class="widget-trend">EXCELLENT</span>
-            </div>
-          </div>
-          <div class="mockup-chart-placeholder">
-            <div class="chart-bar" style="height: 40%"></div>
-            <div class="chart-bar" style="height: 60%"></div>
-            <div class="chart-bar" style="height: 45%"></div>
-            <div class="chart-bar" style="height: 80%"></div>
-            <div class="chart-bar" style="height: 95%"></div>
-          </div>
-        </div>
-      </div>
+    <h1 class="hero-title animate-slide-up">Smart Financial Tracking,<br><span class="highlight">Simulated Markets.</span></h1>
+    <p class="hero-subtitle animate-slide-up-delay">
+      Track expenses, build goals, invest in simulated stock markets, and purchase digital gold to level up your financial wellness score.
+    </p>
+    <div class="hero-actions animate-slide-up-delay">
+      <a routerLink="/login" class="btn btn-primary btn-lg">Explore Your Dashboard</a>
     </div>
   </section>
 
-  <!-- Features Grid -->
-  <section class="features-section">
-    <div class="section-header">
-      <h2 class="section-title">Everything You Need to Build Wealth</h2>
-      <p class="section-subtitle">Features crafted to give you ultimate control over your virtual portfolio and real habits.</p>
+  <!-- Features section -->
+  <section class="features-grid animate-fade-in-delayed">
+    <!-- Feature 1 -->
+    <div class="feature-card">
+      <div class="icon-wrap color-blue"><i class="ti ti-wallet"></i></div>
+      <h3>Expense Tracking</h3>
+      <p>Log your daily income and expenses. Keep a clean dual-ledger of your cash flow.</p>
     </div>
 
-    <div class="features-grid">
-      <div class="feature-card glass-panel" *ngFor="let feat of features">
-        <div class="feat-icon-wrapper">
-          <span class="material-icons feat-icon">{{ feat.icon }}</span>
-        </div>
-        <h3 class="feat-title">{{ feat.title }}</h3>
-        <p class="feat-desc">{{ feat.description }}</p>
-      </div>
+    <!-- Feature 2 -->
+    <div class="feature-card">
+      <div class="icon-wrap color-amber"><i class="ti ti-trending-up"></i></div>
+      <h3>Stock Simulation</h3>
+      <p>Simulate real-world stock exchanges with zero risk. Access AI stock suggestions matched to your appetite.</p>
     </div>
-  </section>
 
-  <!-- Stats Banner -->
-  <section class="stats-section glass-panel">
-    <div class="stat-item" *ngFor="let stat of stats">
-      <span class="stat-value gradient-text">{{ stat.value }}</span>
-      <span class="stat-label">{{ stat.label }}</span>
+    <!-- Feature 3 -->
+    <div class="feature-card">
+      <div class="icon-wrap color-gold"><i class="ti ti-crown"></i></div>
+      <h3>Digital Gold</h3>
+      <p>Diversify your portfolio by investing in Digital Gold, ETFs, or SGBs at live simulated prices.</p>
+    </div>
+
+    <!-- Feature 4 -->
+    <div class="feature-card">
+      <div class="icon-wrap color-teal"><i class="ti ti-activity"></i></div>
+      <h3>Wellness Meter</h3>
+      <p>Analyze your financial wellness and risk exposure via automated backend scoring algorithms.</p>
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="landing-footer">
-    <p>&copy; 2026 FinWell Inc. Built with Angular & Spring Boot.</p>
+    <p>&copy; 2026 FinWell. Built for smart financial planning.</p>
   </footer>
 </div>

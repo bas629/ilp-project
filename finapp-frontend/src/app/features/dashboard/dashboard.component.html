@@ -1,0 +1,160 @@
+<div class="page-content">
+
+  <!-- Loading state -->
+  <div *ngIf="loading()" class="empty-state">
+    <i class="ti ti-loader spin" aria-hidden="true"></i>
+    <p>Loading your financial data...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error()" class="alert alert-danger mb-14">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i>
+    {{ error() }}
+  </div>
+
+  <div *ngIf="!loading()">
+
+    <!-- Admin Threshold Rules Violation Alerts -->
+    <div *ngFor="let alert of activeAlerts" 
+         class="alert mb-14" 
+         [ngClass]="{
+           'alert-danger': alert.type === 'danger',
+           'alert-warn': alert.type === 'warn',
+           'alert-info': alert.type === 'info'
+         }">
+      <i class="ti" [ngClass]="alert.icon" aria-hidden="true"></i>
+      <strong>{{ alert.title }}:</strong> {{ alert.desc }}
+    </div>
+
+    <!-- Simplified Metric cards -->
+    <div class="row-4 mb-20">
+      <div class="metric-card">
+        <div class="metric-label">Wallet Balance</div>
+        <div class="metric-value" [ngClass]="totalBalance >= 0 ? 'blue' : 'red'">{{ totalBalance | inr }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total Income</div>
+        <div class="metric-value green">{{ totalIncome | inr }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total Expenses</div>
+        <div class="metric-value red">{{ totalExpenses | inr }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Total Invested</div>
+        <div class="metric-value amber">{{ totalInvested | inr }}</div>
+      </div>
+    </div>
+
+    <!-- Charts + Recent transactions -->
+    <div class="row-2 mb-20">
+
+      <!-- Monthly expenses bar chart -->
+      <div class="card">
+        <div class="card-title">Monthly Expenses</div>
+        <div class="bar-chart-wrap">
+          <div class="bar-chart">
+            <div class="bar-col" *ngFor="let m of monthlyChartData">
+              <div class="bar-col-fill"
+                   [style.height.%]="m.heightPct || 2"
+                   [style.background]="m.heightPct === 100 ? '#3b82f6' : '#dbeafe'">
+              </div>
+              <span class="bar-col-label">{{ m.label }}</span>
+              <span class="bar-col-amount">{{ m.amount | inr }}</span>
+            </div>
+          </div>
+          <div *ngIf="expenses.length === 0" class="empty-state" style="padding: 20px 0">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i>
+            <p>No expense data logged.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent transactions -->
+      <div class="card">
+        <div class="card-title">
+          Recent Transactions
+          <a routerLink="/app/records" style="font-size:12px;color:#3b82f6;font-weight:500;text-decoration:none">View All</a>
+        </div>
+        <div *ngIf="recentTransactions.length === 0" class="empty-state" style="padding: 16px 0">
+          <i class="ti ti-receipt" aria-hidden="true"></i>
+          <p>No transactions recorded yet.</p>
+        </div>
+        <div class="recent-tx" *ngFor="let tx of recentTransactions">
+          <div class="tx-left">
+            <span class="badge" [ngClass]="isIncome(tx) ? 'badge-income' : 'badge-expense'">
+              {{ isIncome(tx) ? 'Income' : 'Expense' }}
+            </span>
+            <span class="tx-title">{{ tx.title }}</span>
+          </div>
+          <div class="tx-right">
+            <span [style.color]="isIncome(tx) ? '#10b981' : '#ef4444'" style="font-weight:600">
+              {{ isIncome(tx) ? '+' : '-' }}{{ tx.amount | inr }}
+            </span>
+            <span class="tx-date">{{ tx.expenseDate }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Simplified Health overview row -->
+    <div class="row-3 mb-20">
+
+      <!-- Wellness score -->
+      <div class="card" style="text-align:center;cursor:pointer" routerLink="/app/wellness">
+        <div class="card-title" style="justify-content:center">Financial Wellness</div>
+        <div style="font-size:36px;font-weight:700;margin:6px 0;color:#3b82f6">
+          {{ wellnessScore }}
+        </div>
+        <span class="badge" [ngClass]="wellnessBadgeClass" style="margin-top:4px">{{ wellnessCategory }} Score</span>
+      </div>
+
+      <!-- Risk profile -->
+      <div class="card" style="text-align:center;cursor:pointer" routerLink="/app/risk">
+        <div class="card-title" style="justify-content:center">Portfolio Risk</div>
+        <div style="font-size:36px;font-weight:700;margin:6px 0"
+             [style.color]="riskLevel === 'Low' ? '#10b981' : riskLevel === 'Medium' ? '#f59e0b' : '#ef4444'">
+          {{ riskLevel }}
+        </div>
+        <span class="badge" [ngClass]="riskBadgeClass" style="margin-top:4px">Based on active holdings</span>
+      </div>
+
+      <!-- Net position -->
+      <div class="card" style="text-align:center;cursor:pointer" routerLink="/app/expenses">
+        <div class="card-title" style="justify-content:center">Net Savings</div>
+        <div style="font-size:36px;font-weight:700;margin:6px 0"
+             [style.color]="netPosition >= 0 ? '#10b981' : '#ef4444'">
+          {{ netPosition >= 0 ? '+' : '' }}{{ netPosition | inr }}
+        </div>
+        <span class="badge" [class.badge-income]="netPosition >= 0" [class.badge-expense]="netPosition < 0" style="margin-top:4px">
+          Income vs Expenses
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Outlined/Simple Quick Actions -->
+    <div class="card">
+      <div class="card-title">Quick Actions</div>
+      <div class="flex-row" style="flex-wrap:wrap;gap:8px">
+        <a class="btn btn-outline btn-sm" routerLink="/app/expenses">
+          <i class="ti ti-plus"></i> Add Expense/Income
+        </a>
+        <a class="btn btn-outline btn-sm" routerLink="/app/stocks">
+          <i class="ti ti-trending-up"></i> Invest in Stocks
+        </a>
+        <a class="btn btn-outline btn-sm" routerLink="/app/gold">
+          <i class="ti ti-crown"></i> Invest in Gold
+        </a>
+        <a class="btn btn-outline btn-sm" routerLink="/app/records">
+          <i class="ti ti-list"></i> View Records
+        </a>
+        <a class="btn btn-outline btn-sm" routerLink="/app/portfolio">
+          <i class="ti ti-briefcase"></i> View Portfolio
+        </a>
+      </div>
+    </div>
+
+  </div>
+</div>

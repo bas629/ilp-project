@@ -1,0 +1,10 @@
+<div class="metric-card">
+  <div class="metric-label">
+    <i class="ti {{icon}}" aria-hidden="true"></i>
+    {{ label }}
+  </div>
+  <div class="metric-value" [ngClass]="colorClass">
+    {{ isCurrency ? (value | inr) : value }}
+  </div>
+  <div class="metric-sub" *ngIf="sub">{{ sub }}</div>
+</div>

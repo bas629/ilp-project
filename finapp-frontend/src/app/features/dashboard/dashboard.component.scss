@@ -1,0 +1,32 @@
+.bar-chart-wrap { padding: 8px 0; }
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 110px;
+  padding: 0 4px;
+}
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+  height: 100%;
+  justify-content: flex-end;
+  .bar-col-fill { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: height 0.3s; }
+  .bar-col-label { font-size: 9px; color: #9CA3AF; }
+  .bar-col-amount { font-size: 9px; color: #6B7280; }
+}
+.recent-tx {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+  &:last-child { border-bottom: none; }
+  .tx-left { display: flex; align-items: center; gap: 8px; }
+  .tx-title { font-size: 12px; color: #111827; }
+  .tx-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .tx-date { font-size: 10px; color: #9CA3AF; }
+}

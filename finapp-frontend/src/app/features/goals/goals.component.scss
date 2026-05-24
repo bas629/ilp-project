@@ -1,0 +1,28 @@
+.goal-item {
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  &:last-child { border-bottom: none; }
+}
+.goal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.goal-name   { font-size: 13px; font-weight: 500; }
+.goal-amounts { font-size: 12px; color: #6B7280; margin-bottom: 2px; }
+
+.progress-bg {
+  height: 6px;
+  background: #E5E7EB;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+  &.green  { background: #3B6D11; }
+  &.teal   { background: #0D9488; }
+  &.purple { background: #7C3AED; }
+}

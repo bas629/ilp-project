@@ -1,189 +1,192 @@
-<div class="stocks-wrapper animate-fade-in">
-  <!-- HEADER PANEL -->
-  <header class="stocks-header">
+<div class="page-content">
+
+  <!-- Header & Balance -->
+  <div class="row-2 mb-14" style="align-items: center;">
     <div>
-      <h1 class="page-title">Mock Stock Exchange</h1>
-      <p class="page-subtitle">Trade simulated stock assets in real-time. Prices tick dynamically.</p>
+      <h1 style="margin: 0 0 4px 0;">Mock Stock Exchange</h1>
+      <p style="color: var(--text-secondary); margin: 0; font-size: 13px;">Trade simulated stock assets in real-time. Prices tick dynamically.</p>
     </div>
     
-    <div class="glass-panel balance-display-card">
-      <span class="bal-label">AVAILABLE CASH WALLET</span>
-      <h2 class="bal-val">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</h2>
+    <div class="card" style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--green);">
+      <div>
+        <span class="section-label" style="font-size: 9px;">Available Cash Wallet</span>
+        <div style="font-size: 20px; font-weight: 600; color: var(--text-primary); margin-top: 2px;">
+          {{ cashBalance | currency:'INR':'symbol':'1.2-2' }}
+        </div>
+      </div>
+      <div style="font-size: 24px; color: var(--green); opacity: 0.8; display: flex; align-items: center;">
+        <i class="ti ti-wallet"></i>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <!-- FILTERS BAR -->
-  <div class="market-controls-row">
-    <div class="filters-group">
-      <!-- Search input -->
-      <div class="search-input-wrapper">
-        <span class="material-icons-outlined search-icon">search</span>
+  <!-- Filters Row -->
+  <div class="card mb-14" style="padding: 12px 16px;">
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+      <div class="form-group" style="margin-bottom: 0; flex: 2; min-width: 200px;">
         <input 
           type="text" 
           [(ngModel)]="searchQuery" 
           (ngModelChange)="applyFilters()" 
           placeholder="Search companies..." 
-          class="form-control filter-control"
+          style="padding: 7px 12px;"
         />
       </div>
 
-      <!-- Sector select -->
-      <select 
-        [(ngModel)]="selectedSector" 
-        (change)="applyFilters()" 
-        class="form-control filter-control"
-      >
-        <option *ngFor="let sec of sectors" [value]="sec">{{ sec }}</option>
-      </select>
+      <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 140px;">
+        <select 
+          [(ngModel)]="selectedSector" 
+          (change)="applyFilters()" 
+          style="padding: 7px 12px;"
+        >
+          <option *ngFor="let sec of sectors" [value]="sec">{{ sec }}</option>
+        </select>
+      </div>
 
-      <!-- Volatility select -->
-      <select 
-        [(ngModel)]="selectedVolatility" 
-        (change)="applyFilters()" 
-        class="form-control filter-control"
-      >
-        <option *ngFor="let vol of volatilities" [value]="vol">{{ vol }}</option>
-      </select>
+      <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 140px;">
+        <select 
+          [(ngModel)]="selectedVolatility" 
+          (change)="applyFilters()" 
+          style="padding: 7px 12px;"
+        >
+          <option *ngFor="let vol of volatilities" [value]="vol">{{ vol }}</option>
+        </select>
+      </div>
+
+      <button class="btn btn-outline btn-sm" (click)="fetchInitialData()" style="padding: 8px 12px; margin-left: auto;">
+        <i class="ti ti-refresh"></i>
+        Sync Board
+      </button>
     </div>
-
-    <button class="btn btn-secondary" (click)="fetchInitialData()" title="Reload Market Prices">
-      <span class="material-icons-outlined">refresh</span>
-      <span>Sync Market</span>
-    </button>
   </div>
 
-  <!-- STOCKS CARDS GRID -->
-  <div *ngIf="isLoading && stocks.length === 0" class="loader-container">
-    <div class="spinner"></div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading && stocks.length === 0" class="empty-state">
+    <i class="ti ti-loader-2 spin" style="font-size: 32px; animation: spin 1.2s linear infinite;"></i>
     <p>Opening live market board feeds...</p>
   </div>
 
-  <div 
-    class="stocks-grid" 
-    *ngIf="!isLoading && filteredStocks.length > 0"
-  >
+  <!-- Stock Cards Grid -->
+  <div class="row-3" *ngIf="!isLoading && filteredStocks.length > 0">
     <div 
-      class="glass-panel stock-card" 
+      class="card stock-live-card" 
       *ngFor="let stock of filteredStocks"
+      style="display: flex; flex-direction: column; justify-content: space-between; min-height: 240px; position: relative; transition: all 0.2s;"
       [ngClass]="stock.changeClass"
     >
-      <!-- Top Badges -->
-      <div class="card-badges">
-        <span class="badge badge-sector">{{ stock.sector }}</span>
-        <!-- Risk category range badge with tooltip -->
+      <!-- Top badges -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <span class="badge badge-teal">{{ stock.sector }}</span>
         <span 
           class="badge" 
           [ngClass]="getRiskBadgeClass(stock.riskPercent)"
           [title]="getRiskTooltip(stock.riskPercent)"
         >
-          {{ getRiskLabel(stock.riskPercent) }} ({{ stock.riskPercent }}%)
+          {{ getRiskLabel(stock.riskPercent) }}
         </span>
       </div>
 
-      <!-- Company Name & Stats -->
-      <div class="card-main">
-        <h3 class="company-name">{{ stock.companyName }}</h3>
-        <p class="market-cap">Cap: {{ stock.marketCap | currency:'INR':'symbol':'1.0-0' }}M</p>
+      <!-- Main company details -->
+      <div>
+        <h3 style="font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">{{ stock.companyName }}</h3>
+        <span style="font-size: 11px; color: var(--text-tertiary);">Cap: {{ stock.marketCap | currency:'INR':'symbol':'1.0-0' }}M</span>
       </div>
 
-      <!-- Live Price Details -->
-      <div class="card-price-section">
-        <span class="price-val">{{ stock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
-        
-        <span 
-          class="price-pct-change" 
-          [ngClass]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'text-up' : 'text-down'"
-        >
-          <span class="material-icons-outlined arrow-icon">
-            {{ (stock.currentPrice - stock.previousPrice) >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+      <!-- Price & Trend Sparkline -->
+      <div style="margin: 12px 0; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+        <div>
+          <div style="font-size: 20px; font-weight: 600; color: var(--text-primary);">
+            {{ stock.currentPrice | currency:'INR':'symbol':'1.2-2' }}
+          </div>
+          <span 
+            style="font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px;"
+            [style.color]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'var(--green-dark)' : 'var(--red-dark)'"
+          >
+            <i class="ti" [ngClass]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'ti-arrow-up-right' : 'ti-arrow-down-left'"></i>
+            {{ (((stock.currentPrice - stock.previousPrice) / stock.previousPrice) * 100) | number:'1.2-2' }}%
           </span>
-          {{ (((stock.currentPrice - stock.previousPrice) / stock.previousPrice) * 100) | number:'1.2-2' }}%
-        </span>
+        </div>
+
+        <div style="flex: 1; max-width: 100px; height: 30px; display: flex; align-items: center;">
+          <svg style="width: 100%; height: 26px; overflow: visible;">
+            <path 
+              [attr.d]="getSparklinePath(stock.priceHistory)" 
+              fill="none" 
+              [attr.stroke]="getSparklineColor(stock.priceHistory)" 
+              stroke-width="1.8"
+              stroke-linecap="round"
+            />
+          </svg>
+        </div>
       </div>
 
-      <!-- SVG Sparkline -->
-      <div class="sparkline-container" title="15-tick price trend">
-        <svg class="sparkline-svg">
-          <path 
-            [attr.d]="getSparklinePath(stock.priceHistory)" 
-            fill="none" 
-            [attr.stroke]="getSparklineColor(stock.priceHistory)" 
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-      </div>
-
-      <!-- Action Trades -->
-      <div class="card-actions">
-        <button class="btn btn-success flex-1" (click)="openTradeModal(stock, 'BUY')">
-          <span>BUY</span>
+      <!-- Buy/Sell Trade buttons -->
+      <div style="display: flex; gap: 8px; margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 12px;">
+        <button class="btn btn-success btn-sm" style="flex: 1; justify-content: center;" (click)="openTradeModal(stock, 'BUY')">
+          Buy
         </button>
-        <button class="btn btn-danger flex-1" (click)="openTradeModal(stock, 'SELL')">
-          <span>SELL</span>
+        <button class="btn btn-danger btn-sm" style="flex: 1; justify-content: center;" (click)="openTradeModal(stock, 'SELL')">
+          Sell
         </button>
       </div>
     </div>
   </div>
 
   <!-- Empty state fallback -->
-  <div 
-    class="glass-panel empty-board-panel" 
-    *ngIf="!isLoading && filteredStocks.length === 0"
-  >
-    <span class="material-icons-outlined empty-icon">analytics</span>
-    <h3>No Stocks Match Filters</h3>
-    <p>Try resetting the sector dropdown search filters to view active stock listings.</p>
+  <div class="empty-state" *ngIf="!isLoading && filteredStocks.length === 0">
+    <i class="ti ti-chart-bar" style="font-size: 40px;"></i>
+    <p style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">No Stocks Match Filters</p>
+    <p>Try resetting the sector search query or dropdown filters to view active stock listings.</p>
   </div>
 
-  <!-- BUY/SELL STOCKS DIALOG OVERLAY CONFIRMATION MODAL -->
-  <div class="modal-backdrop" *ngIf="showTradeModal">
-    <div class="glass-panel modal-card animate-scale-in">
+  <!-- Order modal dialog overlay -->
+  <div *ngIf="showTradeModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(3px);">
+    <div class="card animate-scale-in" style="max-width: 440px; width: 100%; border: 1px solid var(--border-strong); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
       
       <!-- Modal Header -->
-      <div class="modal-header">
-        <div class="header-details">
-          <span class="badge" [ngClass]="tradeAction === 'BUY' ? 'badge-low' : 'badge-high'">
+      <div class="flex-between" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+        <div>
+          <span class="badge" [ngClass]="tradeAction === 'BUY' ? 'badge-green' : 'badge-red'" style="margin-bottom: 4px;">
             {{ tradeAction }} ORDER
           </span>
-          <h2>Confirm Transaction</h2>
-          <span class="modal-sector">Company: {{ selectedStock?.companyName }}</span>
+          <h2 style="margin: 0; font-size: 16px; font-weight: 600;">Confirm Stock Order</h2>
+          <span style="font-size: 11px; color: var(--text-secondary);">Company: {{ selectedStock?.companyName }}</span>
         </div>
-        <button class="btn-close" (click)="closeTradeModal()">
-          <span class="material-icons">close</span>
+        <button class="btn-icon" (click)="closeTradeModal()">
+          <i class="ti ti-x" style="font-size: 18px;"></i>
         </button>
       </div>
 
       <!-- Modal Body -->
-      <div class="modal-body" *ngIf="selectedStock">
-        <div class="deposit-info-block">
-          <div class="info-row">
-            <span>Cash Wallet Available:</span>
-            <strong>{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
+      <div *ngIf="selectedStock">
+        <!-- Balance / Price Row -->
+        <div style="background: var(--sidebar-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; font-size: 13px;">
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Cash Wallet Available:</span>
+            <strong style="color: var(--text-primary);">{{ cashBalance | currency:'INR':'symbol':'1.2-2' }}</strong>
           </div>
-          <div class="info-row" *ngIf="tradeAction === 'SELL'">
-            <span>Your Owned Shares:</span>
-            <strong>{{ getCurrentHoldingsQty() }}</strong>
+          <div class="flex-between" *ngIf="tradeAction === 'SELL'">
+            <span style="color: var(--text-secondary);">Your Owned Shares:</span>
+            <strong style="color: var(--text-primary);">{{ getCurrentHoldingsQty() }}</strong>
           </div>
-          <div class="info-row">
-            <span>Market Price:</span>
-            <strong>{{ selectedStock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</strong>
+          <div class="flex-between">
+            <span style="color: var(--text-secondary);">Market Price:</span>
+            <strong style="color: var(--text-primary);">{{ selectedStock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</strong>
           </div>
-          <div class="info-row border-top">
-            <span>Total Value:</span>
-            <strong class="total-val">{{ calculateTotalCost() | currency:'INR':'symbol':'1.2-2' }}</strong>
+          <div class="flex-between" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 4px;">
+            <span style="font-weight: 500; color: var(--text-primary);">Total Cost:</span>
+            <strong style="font-size: 15px; color: var(--blue-mid);">{{ calculateTotalCost() | currency:'INR':'symbol':'1.2-2' }}</strong>
           </div>
         </div>
 
-        <form (ngSubmit)="executeTrade()" class="deposit-form">
-          <div class="input-group">
-            <label class="input-label" for="qty">Quantity of Shares</label>
+        <form (ngSubmit)="executeTrade()">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label>Quantity of Shares</label>
             <input 
               type="number" 
-              id="qty" 
               name="qty" 
               [(ngModel)]="tradeQuantity" 
-              class="form-control qty-input" 
+              style="font-size: 16px; font-weight: 600; text-align: center;" 
               required 
               min="1"
               step="1"
@@ -191,32 +194,34 @@
           </div>
 
           <!-- Warnings -->
-          <div *ngIf="tradeAction === 'BUY' && calculateTotalCost() > cashBalance" class="error-msg">
-            <span class="material-icons-outlined">error_outline</span>
+          <div *ngIf="tradeAction === 'BUY' && calculateTotalCost() > cashBalance" class="alert alert-danger" style="margin-bottom: 16px;">
+            <i class="ti ti-alert-circle"></i>
             <span>Transaction exceeds your cash wallet funds.</span>
           </div>
 
-          <div *ngIf="tradeAction === 'SELL' && tradeQuantity > getCurrentHoldingsQty()" class="error-msg">
-            <span class="material-icons-outlined">error_outline</span>
+          <div *ngIf="tradeAction === 'SELL' && tradeQuantity > getCurrentHoldingsQty()" class="alert alert-danger" style="margin-bottom: 16px;">
+            <i class="ti ti-alert-circle"></i>
             <span>You cannot sell more shares than you hold.</span>
           </div>
 
-          <div class="modal-buttons">
+          <div class="flex-row" style="margin-top: 20px;">
             <button 
               type="button" 
-              class="btn btn-secondary flex-1" 
+              class="btn btn-outline" 
+              style="flex: 1; justify-content: center;"
               (click)="closeTradeModal()"
             >
               Cancel
             </button>
             <button 
               type="submit" 
-              class="btn flex-2" 
+              class="btn" 
               [ngClass]="tradeAction === 'BUY' ? 'btn-success' : 'btn-danger'"
+              style="flex: 1.5; justify-content: center;"
               [disabled]="!isValidTrade() || isTrading"
             >
-              <span *ngIf="!isTrading">Confirm {{ tradeAction }}</span>
-              <span *ngIf="isTrading" class="spinner"></span>
+              <i class="ti ti-check"></i>
+              {{ isTrading ? 'Executing...' : 'Confirm Order' }}
             </button>
           </div>
         </form>

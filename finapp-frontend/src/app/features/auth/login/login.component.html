@@ -1,0 +1,117 @@
+<div class="auth-page">
+  <!-- LEFT — Login -->
+  <div class="auth-left">
+    <div class="auth-brand">
+      <div class="brand-icon"><i class="ti ti-chart-pie"></i></div>
+      <span class="brand-name">FinApp</span>
+    </div>
+
+    <h2>Welcome back</h2>
+    <p class="auth-sub">Sign in to your account</p>
+
+    <div *ngIf="loginLocked()" class="alert alert-danger mb-20">
+      <i class="ti ti-lock"></i>
+      Account temporarily locked after 3 failed attempts. Please contact support.
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="e.g. sandeep@gmail.com">
+        <span class="form-error" *ngIf="lf['email'].invalid && lf['email'].touched">Valid email required</span>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" formControlName="password" placeholder="Enter your password">
+        <span class="form-error" *ngIf="lf['password'].invalid && lf['password'].touched">Password required</span>
+        <span class="form-error" *ngIf="loginError()">{{ loginError() }}</span>
+      </div>
+      <button type="submit" class="btn btn-primary w-full"
+              [disabled]="loginForm.invalid || loginLocked() || loading()">
+        <i class="ti ti-login"></i>
+        {{ loading() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- RIGHT — Register -->
+  <div class="auth-right">
+    <h2>Create account</h2>
+    <p class="auth-sub">Customer registration</p>
+
+    <div *ngIf="registerError()" class="alert alert-danger mb-14">
+      <i class="ti ti-alert-circle"></i>{{ registerError() }}
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="auth-form">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Customer name</label>
+          <input formControlName="name" placeholder="e.g. Sandeep Kumar">
+          <span class="form-error" *ngIf="rf['name'].invalid && rf['name'].touched">Min 3 chars, letters only</span>
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input formControlName="username" placeholder="e.g. sandeep123">
+          <span class="form-error" *ngIf="rf['username'].invalid && rf['username'].touched">Min 5 chars, no spaces</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" formControlName="email" placeholder="e.g. sandeep@gmail.com">
+        <span class="form-error" *ngIf="rf['email'].invalid && rf['email'].touched">Valid email required</span>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Country code</label>
+          <select formControlName="countryCode">
+            <option>+91</option>
+            <option>+1</option>
+            <option>+44</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mobile number</label>
+          <input formControlName="mobile" placeholder="e.g. 9876543210">
+          <span class="form-error" *ngIf="rf['mobile'].invalid && rf['mobile'].touched">8–10 digits</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Address</label>
+        <textarea formControlName="address" placeholder="e.g. Flat 102, Royal Enclave, Andheri West, Mumbai, 400053"></textarea>
+        <span class="form-error" *ngIf="rf['address'].invalid && rf['address'].touched">Min 10 characters required</span>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" formControlName="password" placeholder="e.g. SecureP@ss123">
+          <span class="form-error" *ngIf="rf['password'].invalid && rf['password'].touched">
+            Min 8 chars, upper, lower, digit & special char
+          </span>
+        </div>
+        <div class="form-group">
+          <label>Confirm password</label>
+          <input type="password" formControlName="confirmPassword" placeholder="Confirm your password">
+          <span class="form-error" *ngIf="registerForm.hasError('passwordMismatch') && rf['confirmPassword'].touched">
+            Passwords do not match
+          </span>
+        </div>
+      </div>
+
+      <div class="auth-actions">
+        <button type="submit" class="btn btn-primary"
+                [disabled]="registerForm.invalid || loading()">
+          <i class="ti ti-user-plus"></i>
+          {{ loading() ? 'Registering…' : 'Register' }}
+        </button>
+        <button type="button" class="btn btn-outline" (click)="resetRegister()">
+          <i class="ti ti-refresh"></i> Reset
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

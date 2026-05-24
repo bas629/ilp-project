@@ -1,0 +1,67 @@
+<div class="page-content">
+  <div *ngIf="loading()" class="loading-state">Loading wellness score…</div>
+  <div *ngIf="error()" class="alert alert-danger">{{ error() }}</div>
+
+  <ng-container *ngIf="!loading() && !error() && wellness()">
+    <div class="row-2">
+      <!-- Score card -->
+      <div class="card score-card">
+        <div class="card-title">Overall wellness score</div>
+        <div class="score-display" [style.color]="scoreColor">{{ score }}</div>
+        <span class="badge {{badgeClass}}" style="font-size:13px;padding:4px 14px;">{{ level }}</span>
+        <p style="margin-top:16px;font-size:13px;">Your financial wellness score is calculated from savings rate and investment rate relative to your income.</p>
+      </div>
+
+      <!-- Factor breakdown -->
+      <div class="card">
+        <div class="card-title">Score breakdown</div>
+
+        <div class="mb-14">
+          <div class="flex-between mb-10">
+            <span style="font-size:13px;font-weight:500;">Savings rate</span>
+            <span class="badge badge-info">{{ wellness()!.savingsRate | number:'1.1-1' }}%</span>
+          </div>
+          <app-progress-bar [value]="savingsBarPct" [max]="100" colorClass="green" />
+          <p style="font-size:11px;margin-top:4px;">{{ savingsDesc }}</p>
+        </div>
+
+        <div class="mb-14">
+          <div class="flex-between mb-10">
+            <span style="font-size:13px;font-weight:500;">Investment rate</span>
+            <span class="badge badge-info">{{ wellness()!.investmentRate | number:'1.1-1' }}%</span>
+          </div>
+          <app-progress-bar [value]="investmentBarPct" [max]="100" colorClass="blue" />
+          <p style="font-size:11px;margin-top:4px;">{{ investmentDesc }}</p>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-item"><div class="stat-label">Total Income</div><div class="stat-val">{{ wellness()!.totalIncome | inr }}</div></div>
+          <div class="stat-item"><div class="stat-label">Total Expenses</div><div class="stat-val">{{ wellness()!.totalExpenses | inr }}</div></div>
+          <div class="stat-item"><div class="stat-label">Total Invested</div><div class="stat-val">{{ wellness()!.totalInvested | inr }}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-20">
+      <div class="card-title">Recommendations</div>
+      <div class="rec-list">
+        <div class="rec-item alert alert-info" *ngIf="(wellness()!.savingsRate) < 20">
+          <i class="ti ti-piggy-bank"></i>
+          <div>Increase savings rate to 20%+ — currently at {{ wellness()!.savingsRate | number:'1.1-1' }}%.</div>
+        </div>
+        <div class="rec-item alert alert-success" *ngIf="(wellness()!.savingsRate) >= 20">
+          <i class="ti ti-check"></i>
+          <div>Great savings rate of {{ wellness()!.savingsRate | number:'1.1-1' }}% — keep it up!</div>
+        </div>
+        <div class="rec-item alert alert-warn" *ngIf="(wellness()!.investmentRate) < 15">
+          <i class="ti ti-chart-donut"></i>
+          <div>Invest at least 15% of income — currently at {{ wellness()!.investmentRate | number:'1.1-1' }}%.</div>
+        </div>
+        <div class="rec-item alert alert-success" *ngIf="(wellness()!.investmentRate) >= 15">
+          <i class="ti ti-check"></i>
+          <div>Solid investment rate of {{ wellness()!.investmentRate | number:'1.1-1' }}% — well done!</div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

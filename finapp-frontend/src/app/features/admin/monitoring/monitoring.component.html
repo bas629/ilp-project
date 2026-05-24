@@ -1,0 +1,77 @@
+<div class="page-content animate-fade-in">
+  <div class="row-4 mb-20">
+    <app-metric-card label="Total users"   [value]="totalUsers()"  icon="ti-users"         colorClass="blue"  [isCurrency]="false" />
+    <app-metric-card label="Active today"  [value]="activeToday()" icon="ti-activity"       colorClass="green" [isCurrency]="false" />
+    <app-metric-card label="Total txns"    [value]="totalTx()"     icon="ti-receipt"        colorClass="teal"  [isCurrency]="false" />
+    <app-metric-card label="Alerts today"  [value]="alertsToday()" icon="ti-alert-triangle" colorClass="amber" [isCurrency]="false" />
+  </div>
+
+  <div class="row-2 mb-20">
+    <!-- Recent activity log -->
+    <div class="card">
+      <div class="card-title">Recent activity log</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>User</th>
+              <th>Action</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of combinedLogs">
+              <td style="color:#9CA3AF;">{{ log.time }}</td>
+              <td>{{ log.user }}</td>
+              <td>{{ log.action }}</td>
+              <td><span class="badge {{badgeClass(log.status)}}">{{ log.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Active User Sessions -->
+    <div class="card">
+      <div class="card-title">Active User Sessions</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Logged User</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th style="text-align:right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of usersList()">
+              <td style="font-weight:600">{{ u.email }}</td>
+              <td>
+                <span class="badge" [class.badge-blue]="u.role === 'user'" [class.badge-amber]="u.role === 'admin'">
+                  {{ u.role | titlecase }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [class.badge-success]="u.status !== 'BLOCKED'" [class.badge-error]="u.status === 'BLOCKED'">
+                  {{ u.status || 'ACTIVE' }}
+                </span>
+              </td>
+              <td style="text-align:right">
+                <button *ngIf="u.role !== 'admin'"
+                        class="btn btn-sm"
+                        [class.btn-danger]="u.status !== 'BLOCKED'"
+                        [class.btn-primary]="u.status === 'BLOCKED'"
+                        (click)="toggleBlock(u)"
+                        style="padding: 4px 8px; font-size: 11px; cursor: pointer; border-radius: 4px;">
+                  {{ u.status === 'BLOCKED' ? '🔓 Unblock' : '🚫 Block' }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

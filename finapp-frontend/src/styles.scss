@@ -1,0 +1,514 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$finapp-frontend-primary: mat.define-palette(mat.$indigo-palette);
+$finapp-frontend-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$finapp-frontend-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$finapp-frontend-theme: mat.define-light-theme((
+  color: (
+    primary: $finapp-frontend-primary,
+    accent: $finapp-frontend-accent,
+    warn: $finapp-frontend-warn,
+  ),
+  typography: mat.define-typography-config(),
+  density: 0
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($finapp-frontend-theme);
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
+
+// ── Color palette ──────────────────────────────────────────
+$blue: #378ADD;
+$blue-light: #E6F1FB;
+$blue-mid: #185FA5;
+$blue-dark: #0C447C;
+
+$green: #639922;
+$green-light: #EAF3DE;
+$green-dark: #3B6D11;
+
+$amber: #EF9F27;
+$amber-light: #FAEEDA;
+$amber-dark: #854F0B;
+
+$red: #E24B4A;
+$red-light: #FCEBEB;
+$red-dark: #A32D2D;
+
+$teal: #1D9E75;
+$teal-light: #E1F5EE;
+$teal-dark: #0F6E56;
+
+$purple: #7F77DD;
+$purple-light: #EEEDFE;
+$purple-dark: #534AB7;
+
+$coral: #D85A30;
+$coral-light: #FAECE7;
+
+$sidebar-bg: #F8F9FA;
+$bg-page: #F4F6F9;
+$bg-surface: #ffffff;
+$border-color: rgba(0, 0, 0, 0.09);
+$border-strong: rgba(0, 0, 0, 0.18);
+$text-primary: #111827;
+$text-secondary: #6B7280;
+$text-tertiary: #9CA3AF;
+
+// ── Reset & base ───────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: $text-primary;
+  background: $bg-page;
+  -webkit-font-smoothing: antialiased;
+}
+
+// ── Typography ─────────────────────────────────────────────
+h1 { font-size: 22px; font-weight: 500; }
+h2 { font-size: 18px; font-weight: 500; }
+h3 { font-size: 15px; font-weight: 500; }
+p  { line-height: 1.6; color: $text-secondary; }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: $text-tertiary;
+}
+
+// ── Layout helpers ─────────────────────────────────────────
+.page-content { padding: 20px; }
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-14 { margin-bottom: 14px; }
+.mb-20 { margin-bottom: 20px; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-center  { display: flex; align-items: center; justify-content: center; }
+.flex-row     { display: flex; align-items: center; gap: 10px; }
+
+// ── Card ───────────────────────────────────────────────────
+.card {
+  background: $bg-surface;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  padding: 16px 20px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-primary;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+// ── Metric card ────────────────────────────────────────────
+.metric-card {
+  background: $sidebar-bg;
+  border-radius: 8px;
+  padding: 14px;
+
+  .metric-label {
+    font-size: 11px;
+    color: $text-secondary;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .metric-value {
+    font-size: 22px;
+    font-weight: 500;
+    color: $text-primary;
+    &.blue   { color: $blue-mid; }
+    &.green  { color: $green-dark; }
+    &.red    { color: $red-dark; }
+    &.amber  { color: $amber-dark; }
+    &.teal   { color: $teal-dark; }
+  }
+  .metric-sub {
+    font-size: 11px;
+    color: $text-tertiary;
+    margin-top: 4px;
+  }
+}
+
+// ── Buttons ────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:active { transform: scale(0.98); }
+
+  &.btn-primary {
+    background: $blue;
+    color: #fff;
+    border-color: $blue;
+    &:hover { background: $blue-mid; border-color: $blue-mid; }
+  }
+  &.btn-outline {
+    background: transparent;
+    color: $text-primary;
+    border-color: $border-strong;
+    &:hover { background: $sidebar-bg; }
+  }
+  &.btn-danger {
+    background: $red-light;
+    color: $red-dark;
+    border-color: rgba($red, 0.25);
+    &:hover { background: darken($red-light, 4%); }
+  }
+  &.btn-success {
+    background: $green-light;
+    color: $green-dark;
+    border-color: rgba($green, 0.25);
+  }
+  &.btn-sm {
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+.btn-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: $text-secondary;
+  font-size: 15px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  transition: all 0.12s;
+  &:hover { background: $sidebar-bg; color: $text-primary; }
+  &.danger:hover { background: $red-light; color: $red-dark; }
+}
+
+// ── Form fields ────────────────────────────────────────────
+.form-group {
+  margin-bottom: 12px;
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: $text-secondary;
+    margin-bottom: 5px;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: $text-primary;
+    background: $bg-surface;
+    border: 1px solid $border-strong;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.12s;
+    &:focus { border-color: $blue; box-shadow: 0 0 0 3px rgba($blue, 0.1); }
+    &::placeholder { color: $text-tertiary; }
+    &.ng-invalid.ng-touched { border-color: $red; }
+  }
+  textarea { height: 72px; resize: vertical; }
+  select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+  .form-error { font-size: 11px; color: $red-dark; margin-top: 4px; display: block; }
+}
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+// ── Tabs ───────────────────────────────────────────────────
+.tab-bar {
+  display: flex;
+  border-bottom: 1px solid $border-color;
+  margin-bottom: 16px;
+  .tab {
+    padding: 8px 16px;
+    font-size: 13px;
+    color: $text-secondary;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.12s;
+    &:hover { color: $text-primary; }
+    &.active {
+      color: $blue-mid;
+      border-bottom-color: $blue;
+      font-weight: 500;
+    }
+  }
+}
+.tab-type-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border: 1px solid $border-strong;
+  border-radius: 8px;
+  overflow: hidden;
+  width: fit-content;
+  button {
+    padding: 7px 18px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all 0.12s;
+    &.active { background: $blue; color: #fff; }
+  }
+}
+
+// ── Table ──────────────────────────────────────────────────
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+
+  th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: $text-secondary;
+    border-bottom: 1px solid $border-color;
+  }
+  td {
+    padding: 10px 10px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    color: $text-primary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: $sidebar-bg; }
+  .actions-col { text-align: right; }
+}
+.table-wrap { overflow-x: auto; }
+
+// ── Badges ─────────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 20px;
+
+  &.badge-income, &.badge-green  { background: $green-light;  color: $green-dark; }
+  &.badge-expense, &.badge-red   { background: $red-light;    color: $red-dark; }
+  &.badge-invest, &.badge-blue   { background: $blue-light;   color: $blue-dark; }
+  &.badge-gold, &.badge-amber    { background: $amber-light;  color: $amber-dark; }
+  &.badge-teal                   { background: $teal-light;   color: $teal-dark; }
+  &.badge-purple                 { background: $purple-light; color: $purple-dark; }
+  &.badge-info    { background: $blue-light;   color: $blue-dark; }
+  &.badge-warn    { background: $amber-light;  color: $amber-dark; }
+  &.badge-error   { background: $red-light;    color: $red-dark; }
+  &.badge-success { background: $green-light;  color: $green-dark; }
+  &.badge-critical { background: darken($red-light, 4%); color: $red-dark; }
+}
+
+// ── Alert boxes ────────────────────────────────────────────
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  i { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  &.alert-warn    { background: $amber-light; color: $amber-dark; }
+  &.alert-info    { background: $blue-light;  color: $blue-dark; }
+  &.alert-success { background: $green-light; color: $green-dark; }
+  &.alert-danger  { background: $red-light;   color: $red-dark; }
+}
+
+// ── Progress bar ───────────────────────────────────────────
+.progress-wrap {
+  .progress-bg {
+    height: 8px;
+    background: $sidebar-bg;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid $border-color;
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      &.blue   { background: $blue; }
+      &.green  { background: $green; }
+      &.amber  { background: $amber; }
+      &.teal   { background: $teal; }
+      &.red    { background: $red; }
+      &.purple { background: $purple; }
+    }
+  }
+}
+
+// ── Toggle switch ──────────────────────────────────────────
+.toggle-switch {
+  position: relative;
+  width: 38px;
+  height: 22px;
+  flex-shrink: 0;
+  input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    border-radius: 11px;
+    background: $border-strong;
+    cursor: pointer;
+    transition: background 0.2s;
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+  }
+  input:checked + .slider { background: $blue; }
+  input:checked + .slider::after { transform: translateX(16px); }
+}
+
+// ── Quantity stepper ───────────────────────────────────────
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  .qty-btn {
+    width: 24px; height: 24px;
+    border: 1px solid $border-strong;
+    background: $sidebar-bg;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.12s;
+    &:first-child { border-radius: 5px 0 0 5px; }
+    &:last-child  { border-radius: 0 5px 5px 0; }
+    &:hover { background: $border-color; }
+  }
+  .qty-display {
+    width: 32px; height: 24px;
+    border: 1px solid $border-color;
+    border-left: none; border-right: none;
+    text-align: center;
+    font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+    background: $bg-surface;
+  }
+}
+
+// ── Risk bar ───────────────────────────────────────────────
+.risk-segmented-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 8px 0;
+  .seg {
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 500;
+    &.low    { background: $green-light;  color: $green-dark;  flex: 1; }
+    &.medium { background: $amber;        color: $amber-dark;  flex: 2; }
+    &.high   { background: $red-light;    color: $red-dark;    flex: 1; }
+  }
+}
+
+// ── Empty state ────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+  color: $text-tertiary;
+  i { font-size: 40px; margin-bottom: 12px; opacity: 0.4; }
+  p { font-size: 13px; }
+}
+
+// ── Toast / snack ──────────────────────────────────────────
+.toast-success { background: $green-dark !important; color: #fff !important; }
+.toast-error   { background: $red-dark   !important; color: #fff !important; }
+
+// ── Confirm dialog ─────────────────────────────────────────
+.confirm-dialog {
+  padding: 24px;
+  max-width: 380px;
+  .dialog-title { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+  .dialog-body  { font-size: 13px; color: $text-secondary; margin-bottom: 20px; }
+  .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+}
+
+// ── Scrollbar ──────────────────────────────────────────────
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: $border-strong; border-radius: 4px; }
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

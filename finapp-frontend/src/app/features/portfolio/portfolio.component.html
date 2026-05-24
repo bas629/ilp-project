@@ -1,0 +1,198 @@
+<div class="page-content animate-fade-in">
+
+  <div *ngIf="error()" class="alert alert-danger mb-14">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i> {{ error() }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="empty-state">
+    <i class="ti ti-loader spin" aria-hidden="true"></i>
+    <p>Loading your portfolio holdings...</p>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading() && investments().length === 0 && goldHoldings().length === 0" class="empty-state">
+    <i class="ti ti-briefcase" aria-hidden="true"></i>
+    <p>No investments found. Add stocks or gold to begin your wealth tracking.</p>
+    <div style="display:flex;gap:12px;margin-top:12px">
+      <a routerLink="/app/stocks" class="btn btn-primary btn-sm">
+        <i class="ti ti-plus" aria-hidden="true"></i> Buy Stocks
+      </a>
+      <a routerLink="/app/gold" class="btn btn-outline btn-sm">
+        <i class="ti ti-crown" aria-hidden="true"></i> Buy Gold
+      </a>
+    </div>
+  </div>
+
+  <!-- Portfolio content -->
+  <div *ngIf="!loading() && (investments().length > 0 || goldHoldings().length > 0)">
+
+    <!-- Metric cards -->
+    <div class="row-4 mb-20">
+      <div class="metric-card">
+        <div class="metric-label">Total Portfolio Value</div>
+        <div class="metric-value blue">{{ totalInvested | inr }}</div>
+        <div class="metric-sub">Stocks + Gold</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Stock Equities</div>
+        <div class="metric-value teal">{{ totalInvestedStock | inr }}</div>
+        <div class="metric-sub">{{ totalStockUnits }} Units Held</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Gold Assets</div>
+        <div class="metric-value amber">{{ totalInvestedGold | inr }}</div>
+        <div class="metric-sub">{{ totalGoldGrams }} Grams Held</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Weighted Portfolio Risk</div>
+        <div class="metric-value" [ngClass]="avgRisk < 3 ? 'green' : avgRisk < 7 ? 'amber' : 'red'">
+          {{ avgRisk }}%
+        </div>
+        <div class="metric-sub">Asset-weighted risk</div>
+      </div>
+    </div>
+
+    <!-- Allocation and Asset Details -->
+    <div class="row-2 mb-20">
+
+      <!-- Portfolio distribution -->
+      <div class="card">
+        <div class="card-title">Portfolio Asset Allocation</div>
+        <div class="card-subtitle mb-14">Breakdown of stock symbols and gold categories by investment share.</div>
+        
+        <div *ngFor="let item of combinedBreakdown" style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+            <span style="font-weight:600;display:flex;align-items:center;gap:6px">
+              <span class="badge" [class.badge-blue]="item.type === 'Stock'" [class.badge-amber]="item.type === 'Gold'" style="font-size:10px;padding:2px 6px">
+                {{ item.type }}
+              </span>
+              {{ item.name }}
+            </span>
+            <span style="color:#94a3b8;font-weight:500">{{ item.totalInvested | inr }} ({{ getDistributionPct(item.totalInvested) }}%)</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bg" style="background:rgba(255,255,255,0.05);height:6px;border-radius:3px">
+              <div class="progress-fill" 
+                   [class.blue]="item.type==='Stock'"
+                   [class.amber]="item.type==='Gold'"
+                   [style.width.%]="getDistributionPct(item.totalInvested)"
+                   style="height:6px;border-radius:3px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holdings breakdown table -->
+      <div class="card">
+        <div class="card-title">Asset Holdings Summary</div>
+        <div class="card-subtitle mb-14">Aggregated view of asset groups in your portfolio.</div>
+        
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Asset Group</th>
+                <th>Type</th>
+                <th>Units / Grams</th>
+                <th>Total Cost</th>
+                <th>Risk Level</th>
+                <th>Share</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of combinedBreakdown">
+                <td style="font-weight:600">{{ item.name }}</td>
+                <td>
+                  <span class="badge" [class.badge-blue]="item.type === 'Stock'" [class.badge-amber]="item.type === 'Gold'">
+                    {{ item.type }}
+                  </span>
+                </td>
+                <td>{{ item.quantity }}</td>
+                <td style="font-weight:600" [class.blue-text]="item.type==='Stock'" [class.amber-text]="item.type==='Gold'">
+                  {{ item.totalInvested | inr }}
+                </td>
+                <td>
+                  <span class="badge"
+                    [ngClass]="item.riskPercent < 3 ? 'badge-green' : item.riskPercent < 7 ? 'badge-amber' : 'badge-red'">
+                    {{ item.riskPercent }}%
+                  </span>
+                </td>
+                <td style="color:#94a3b8;font-weight:500">{{ getDistributionPct(item.totalInvested) }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Stock Holdings details -->
+    <div class="card mb-20" *ngIf="investments().length > 0">
+      <div class="card-title">Stock Equity Holdings</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Stock Symbol</th>
+              <th>Qty Held</th>
+              <th>Invested Value</th>
+              <th>Risk Profile</th>
+              <th>Purchase Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let inv of investments()">
+              <td style="font-weight:600;color:#000000">{{ inv.stockName }}</td>
+              <td>{{ inv.quantity }} units</td>
+              <td style="color:#3b82f6;font-weight:600">{{ inv.investedAmount | inr }}</td>
+              <td>
+                <span class="badge"
+                  [ngClass]="inv.riskPercent < 3 ? 'badge-green' : inv.riskPercent < 7 ? 'badge-amber' : 'badge-red'">
+                  {{ inv.riskPercent }}% Risk
+                </span>
+              </td>
+              <td style="color:#94a3b8">{{ inv.investmentDate }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Gold Holdings details -->
+    <div class="card" *ngIf="goldHoldings().length > 0">
+      <div class="card-title">Gold & Precious Metal Assets</div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Gold Type</th>
+              <th>Storage / Custody</th>
+              <th>Qty (Grams)</th>
+              <th>Avg Buy Price</th>
+              <th>Total Invested</th>
+              <th>Current Price</th>
+              <th>Current Value</th>
+              <th>P&L</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let g of goldHoldings()">
+              <td style="font-weight:600;color:#000000">{{ g.type }} Gold</td>
+              <td><span class="badge badge-outline">{{ g.storageType }}</span></td>
+              <td>{{ g.quantityGrams }}g</td>
+              <td>{{ g.purchasePricePerGram | inr }}/g</td>
+              <td style="font-weight:600">{{ g.totalInvestment | inr }}</td>
+              <td>{{ g.currentPricePerGram | inr }}/g</td>
+              <td style="font-weight:600;color:#fbbf24">{{ g.currentValue | inr }}</td>
+              <td [style.color]="(g.profitLoss ?? 0) >= 0 ? '#10b981' : '#ef4444'" style="font-weight:600">
+                {{ (g.profitLoss ?? 0) >= 0 ? '+' : '' }}{{ g.profitLoss | inr }} ({{ g.profitLossPct | number:'1.1-2' }}%)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

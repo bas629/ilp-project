@@ -68,7 +68,7 @@ Basu/
 │   │   │   └── notification.service.ts
 │   │   ├── api.service.ts          # Centralized HTTP API calls
 │   │   ├── app.routes.ts           # Lazy-loaded route definitions
-│   │   └── styles.css              # Global design tokens (dark glassmorphism)
+│   │   └── styles.css              # Global design tokens (finapp light design system)
 │   ├── angular.json
 │   └── package.json
 │
@@ -285,9 +285,9 @@ Generates a score (0–100) from four equally weighted (25% each) heuristic rule
 All components are **standalone** (no NgModule), loaded lazily via `app.routes.ts`.
 
 ### Design System
-- **Theme**: Dark glassmorphism — `#0f172a` base, frosted glass cards
-- **Typography**: `Plus Jakarta Sans` (local, via `@fontsource/plus-jakarta-sans` — no CDN)
-- **Icons**: `Material Icons` (local, via `material-icons` npm package — no CDN)
+- **Theme**: Clean, modern light theme — `#F4F6F9` base background, flat white cards with `1px` border, `#F8F9FA` sidebar
+- **Typography**: `DM Sans` (local, via `@fontsource/dm-sans` — no CDN)
+- **Icons**: `Tabler Icons` (local, via `@tabler/icons-webfont` — no CDN)
 - **Animations**: CSS keyframe micro-animations, hover transforms
 
 > All assets are served **locally with no internet dependency**.
@@ -297,17 +297,15 @@ All components are **standalone** (no NgModule), loaded lazily via `app.routes.t
 ### Screen Breakdown
 
 #### 1. Landing Page (`/`)
-Marketing hero page with feature highlights. CTA redirects to `/register`.
+Sleek, modern light-theme landing page with feature summary grids, styled with smooth CSS fade-in and slide-up animations.
 
-#### 2. Register (`/register`)
-Reactive Form with real-time password strength checklist:
-- ≥ 8 characters, uppercase, lowercase, number, special character
-- Live visual checklist updates as user types
+#### 2. Auth Page (`/login` / `/register`)
+- Combined Split Layout (Left: Sign-in form / Right: Register form) styled with flat input groups.
+- Real-time password strength checklist:
+  - ≥ 8 characters, uppercase, lowercase, number, special character
+  - Live visual checklist using Tabler check/x icons.
 
-#### 3. Login (`/login`)
-JWT-based login. Token stored in `localStorage`. Auth guard protects all `/app` routes.
-
-#### 4. Dashboard / Summary (`/app/summary`)
+#### 3. Dashboard / Summary (`/app/summary`)
 Overview cards: Total Net Worth, Cash Balance, Stock Value, Gold Value.
 
 > **Bug Fixed**: When a new user has ₹0 in all assets, Net Worth now correctly shows ₹0 (not ₹1 — caused by a division-by-zero guard overwriting the real value).

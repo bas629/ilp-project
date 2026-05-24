@@ -1,120 +1,132 @@
-<div class="app-layout-container">
-  <!-- TOP TICKER BAR -->
-  <div class="market-ticker-banner">
-    <div class="ticker-content">
-      <!-- Gold price in ticker -->
-      <div class="ticker-item gold-ticker-item" *ngIf="goldData" [ngClass]="goldData.changeClass">
-        <span class="ticker-label">GOLD</span>
-        <span class="ticker-price">{{ goldData.currentPrice | currency:'INR':'symbol':'1.2-2' }}/g</span>
-        <span class="ticker-pct" [ngClass]="goldData.changePercent >= 0 ? 'text-up' : 'text-down'">
-          {{ goldData.changePercent >= 0 ? '▲' : '▼' }} {{ goldData.changePercent | number:'1.2-2' }}%
-        </span>
-      </div>
+<div class="shell">
 
-      <!-- Stocks ticker items -->
-      <div 
-        class="ticker-item" 
-        *ngFor="let stock of stocksList" 
-        [ngClass]="stock.changeClass"
-      >
-        <span class="ticker-symbol">{{ stock.companyName }}</span>
-        <span class="ticker-price">{{ stock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
-        <span class="ticker-change" [ngClass]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'text-up' : 'text-down'">
-          {{ (stock.currentPrice - stock.previousPrice) >= 0 ? '▲' : '▼' }} 
-          {{ (((stock.currentPrice - stock.previousPrice) / stock.previousPrice) * 100) | number:'1.2-2' }}%
-        </span>
-      </div>
-
-      <!-- Duplicate the items for seamless infinite scroll -->
-      <div class="ticker-item gold-ticker-item" *ngIf="goldData" [ngClass]="goldData.changeClass">
-        <span class="ticker-label">GOLD</span>
-        <span class="ticker-price">{{ goldData.currentPrice | currency:'INR':'symbol':'1.2-2' }}/g</span>
-        <span class="ticker-pct" [ngClass]="goldData.changePercent >= 0 ? 'text-up' : 'text-down'">
-          {{ goldData.changePercent >= 0 ? '▲' : '▼' }} {{ goldData.changePercent | number:'1.2-2' }}%
-        </span>
-      </div>
-      <div 
-        class="ticker-item" 
-        *ngFor="let stock of stocksList" 
-        [ngClass]="stock.changeClass"
-      >
-        <span class="ticker-symbol">{{ stock.companyName }}</span>
-        <span class="ticker-price">{{ stock.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
-        <span class="ticker-change" [ngClass]="(stock.currentPrice - stock.previousPrice) >= 0 ? 'text-up' : 'text-down'">
-          {{ (stock.currentPrice - stock.previousPrice) >= 0 ? '▲' : '▼' }} 
-          {{ (((stock.currentPrice - stock.previousPrice) / stock.previousPrice) * 100) | number:'1.2-2' }}%
-        </span>
-      </div>
-    </div>
+  <!-- Mobile overlay -->
+  <div class="mobile-overlay"
+       [class.visible]="isMobile && sidebarOpen"
+       (click)="sidebarOpen = false">
   </div>
 
-  <!-- NEWS EVENT BANNER -->
-  <div class="market-news-banner" *ngIf="latestEvent">
-    <div class="news-banner-content">
-      <span class="material-icons-outlined alert-pulse">campaign</span>
-      <span class="news-text">
-        <strong>[Live Market Event]</strong> {{ latestEvent.title }}: {{ latestEvent.description }} 
-        (Volatility: <span class="news-effect">{{ latestEvent.effect }}</span>)
-      </span>
-      <span class="news-time">Just Now</span>
-    </div>
-  </div>
-
-  <!-- MAIN BODY PORT -->
-  <div class="main-body-container">
-    <!-- SIDEBAR -->
-    <aside class="sidebar-panel glass-panel" [ngClass]="{'collapsed': isSidebarCollapsed}">
-      <div class="sidebar-header">
-        <div class="logo-area">
-          <span class="material-icons logo-icon-main">query_stats</span>
-          <span class="logo-title" *ngIf="!isSidebarCollapsed">FINWELL</span>
-        </div>
-        <button class="toggle-btn" (click)="toggleSidebar()">
-          <span class="material-icons">{{ isSidebarCollapsed ? 'chevron_right' : 'chevron_left' }}</span>
-        </button>
+  <!-- SIDEBAR -->
+  <div class="sidebar-wrapper" [class.open]="sidebarOpen">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon"><i class="ti ti-chart-pie"></i></div>
+        <span class="logo-text">FinWell</span>
       </div>
 
-      <!-- Navigation links -->
       <nav class="sidebar-nav">
-        <ul>
-          <li *ngFor="let item of navItems">
-            <a 
-              [routerLink]="item.path" 
-              routerLinkActive="active-link" 
-              [title]="item.label"
-              class="nav-link"
-            >
-              <span class="material-icons-outlined nav-icon">{{ item.icon }}</span>
-              <span class="nav-label" *ngIf="!isSidebarCollapsed">{{ item.label }}</span>
-            </a>
-          </li>
-        </ul>
+
+        <div class="nav-section">
+          <span class="section-label">Overview</span>
+          <a *ngFor="let item of overviewLinks"
+             class="nav-link"
+             [routerLink]="item.path"
+             routerLinkActive="active"
+             (click)="onNavClick()">
+            <i class="ti {{item.icon}}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="section-label">Finance</span>
+          <a *ngFor="let item of financeLinks"
+             class="nav-link"
+             [routerLink]="item.path"
+             routerLinkActive="active"
+             (click)="onNavClick()">
+            <i class="ti {{item.icon}}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="section-label">Investments</span>
+          <a *ngFor="let item of investLinks"
+             class="nav-link"
+             [routerLink]="item.path"
+             routerLinkActive="active"
+             (click)="onNavClick()">
+            <i class="ti {{item.icon}}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </div>
+
+        <div class="nav-section">
+          <span class="section-label">Account</span>
+          <a *ngFor="let item of accountLinks"
+             class="nav-link"
+             [routerLink]="item.path"
+             routerLinkActive="active"
+             (click)="onNavClick()">
+            <i class="ti {{item.icon}}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        </div>
+
       </nav>
 
-      <!-- Profile & Logout Footer -->
       <div class="sidebar-footer">
-        <div class="user-profile-badge" *ngIf="currentUser && !isSidebarCollapsed">
-          <div class="profile-avatar">
-            {{ currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U' }}
-          </div>
-          <div class="profile-details">
-            <span class="profile-name">{{ currentUser.name }}</span>
-            <span class="profile-email">{{ currentUser.email }}</span>
+        <div class="nav-link user-footer-link" *ngIf="currentUser">
+          <div class="avatar-sm">{{ initials }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ currentUser.name }}</span>
+            <span class="user-role">User</span>
           </div>
         </div>
-        
-        <button class="btn btn-secondary logout-btn" (click)="logout()" title="Logout">
-          <span class="material-icons-outlined">logout</span>
-          <span class="logout-label" *ngIf="!isSidebarCollapsed">Log Out</span>
+        <button class="logout-btn" (click)="logout()">
+          <i class="ti ti-logout"></i>
+          <span>Log Out</span>
         </button>
       </div>
     </aside>
+  </div>
 
-    <!-- CONTENT PORT -->
-    <main class="content-viewport">
-      <div class="content-scrollable">
-        <router-outlet></router-outlet>
+  <!-- MAIN RIGHT AREA -->
+  <div class="shell-right">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="btn-icon menu-btn" (click)="toggleSidebar()" aria-label="Toggle sidebar">
+        <i class="ti ti-menu-2"></i>
+      </button>
+      <span class="page-title">{{ pageTitle }}</span>
+      <div class="topbar-right">
+        <!-- Live market event banner -->
+        <div class="market-event-chip" *ngIf="latestEvent">
+          <i class="ti ti-alert-triangle"></i>
+          <span>{{ latestEvent.title }}</span>
+        </div>
+        <div class="topbar-avatar" title="{{ currentUser?.email }}">
+          {{ initials }}
+        </div>
       </div>
+    </header>
+
+    <!-- TICKER BAR -->
+    <div class="ticker-strip" *ngIf="stocksList.length > 0">
+      <div class="ticker-content">
+        <div class="ticker-item" *ngIf="goldData">
+          <span class="ticker-sym">GOLD</span>
+          <span class="ticker-price">{{ goldData.currentPrice | currency:'INR':'symbol':'1.2-2' }}/g</span>
+          <span class="ticker-pct" [class.up]="goldData.changePercent >= 0" [class.down]="goldData.changePercent < 0">
+            {{ goldData.changePercent >= 0 ? '▲' : '▼' }} {{ goldData.changePercent | number:'1.2-2' }}%
+          </span>
+        </div>
+        <div class="ticker-item" *ngFor="let s of stocksList">
+          <span class="ticker-sym">{{ s.companyName }}</span>
+          <span class="ticker-price">{{ s.currentPrice | currency:'INR':'symbol':'1.2-2' }}</span>
+          <span class="ticker-pct" [class.up]="s.currentPrice >= s.previousPrice" [class.down]="s.currentPrice < s.previousPrice">
+            {{ s.currentPrice >= s.previousPrice ? '▲' : '▼' }}
+            {{ (((s.currentPrice - s.previousPrice) / s.previousPrice) * 100) | number:'1.2-2' }}%
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE CONTENT -->
+    <main class="shell-content">
+      <router-outlet></router-outlet>
     </main>
   </div>
+
 </div>

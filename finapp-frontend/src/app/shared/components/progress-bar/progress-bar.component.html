@@ -1,0 +1,9 @@
+<div class="progress-wrap">
+  <div class="flex-between mb-10" *ngIf="label">
+    <span style="font-size:12px">{{ label }}</span>
+    <span style="font-size:12px;color:#6B7280">{{ pct | number:'1.0-0' }}%</span>
+  </div>
+  <div class="progress-bg">
+    <div class="progress-fill {{colorClass}}" [style.width.%]="pct"></div>
+  </div>
+</div>

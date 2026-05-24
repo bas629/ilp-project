@@ -1,0 +1,35 @@
+<div class="page-content">
+  <div class="mb-20">
+    <h1>Data security</h1>
+    <p>Security events and audit log.</p>
+  </div>
+
+  <div class="alert alert-warn mb-20">
+    <i class="ti ti-alert-triangle"></i>
+    <span>1 critical security event requires attention. Review immediately.</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Security events log</div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date / Time</th>
+            <th>Event type</th>
+            <th>Severity</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let e of events">
+            <td style="color:#9CA3AF;font-size:12px;">{{ e.date }}</td>
+            <td>{{ e.type }}</td>
+            <td><span class="badge {{badgeClass(e.severity)}}">{{ e.severity }}</span></td>
+            <td style="white-space:normal;font-size:12px;">{{ e.details }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

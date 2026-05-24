@@ -1,0 +1,33 @@
+.topbar {
+  height: 48px;
+  border-bottom: 1px solid rgba(0,0,0,0.09);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+
+  .menu-btn i { font-size: 18px; }
+
+  .page-title { font-size: 14px; font-weight: 500; flex: 1; }
+
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .topbar-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #E6F1FB;
+    color: #0C447C;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: opacity 0.12s;
+    &:hover { opacity: 0.8; }
+  }
+}

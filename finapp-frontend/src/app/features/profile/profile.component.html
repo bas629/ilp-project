@@ -1,0 +1,47 @@
+<div class="page-content">
+  <div class="row-2">
+    <!-- Profile card -->
+    <div class="card profile-card">
+      <div class="avatar-lg">{{ initials }}</div>
+      <h2>{{ user?.name ?? 'User' }}</h2>
+      <p>{{ user?.email ?? '' }}</p>
+      <span class="badge" [class.badge-blue]="user?.role === 'user'" [class.badge-amber]="user?.role === 'admin'">
+        {{ user?.role | titlecase }}
+      </span>
+    </div>
+
+    <!-- Edit form -->
+    <div class="card">
+      <div class="card-title">Edit profile</div>
+
+      <div *ngIf="saved" class="alert alert-success mb-14">
+        <i class="ti ti-check"></i> Profile saved successfully.
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSave()">
+        <div class="form-group">
+          <label>Full name</label>
+          <input formControlName="name">
+          <span class="form-error" *ngIf="profileForm.get('name')!.invalid && profileForm.get('name')!.touched">Min 3 characters required</span>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" formControlName="email">
+          <span class="form-error" *ngIf="profileForm.get('email')!.invalid && profileForm.get('email')!.touched">Valid email required</span>
+        </div>
+        <div class="alert alert-info mb-14">
+          <i class="ti ti-info-circle"></i>
+          Password update and additional profile fields will be available once the backend API is extended.
+        </div>
+        <div class="flex-row">
+          <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid">
+            <i class="ti ti-device-floppy"></i> Save changes
+          </button>
+          <button type="button" class="btn btn-danger btn-sm" (click)="logout()">
+            <i class="ti ti-logout"></i> Logout
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
